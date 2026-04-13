@@ -51,7 +51,7 @@ export function RegisterView() {
         <CardHeader className="text-center">
           <CardTitle className="text-2xl text-white">Crear Negocio</CardTitle>
           <CardDescription className="text-purple-200">
-            Registra tu negocio en FideliQR
+            Registra tu negocio en RewardPoints
           </CardDescription>
         </CardHeader>
         <CardContent>

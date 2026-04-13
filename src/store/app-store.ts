@@ -11,6 +11,7 @@ export type ViewType =
   | 'rewards'
   | 'settings'
   | 'public-checkin'
+  | 'notifications'
 
 interface User {
   id: string
@@ -39,7 +40,7 @@ export const useAppStore = create<AppState>()(
     (set) => ({
       user: null,
       isAuthenticated: false,
-      businessName: 'FideliQR',
+      businessName: 'RewardPoints',
       businessLogo: '',
       currentView: 'landing',
       viewParams: {},
@@ -58,7 +59,7 @@ export const useAppStore = create<AppState>()(
           user: null, 
           isAuthenticated: false, 
           currentView: 'landing',
-          businessName: 'FideliQR',
+          businessName: 'RewardPoints',
           businessLogo: ''
         })
       },

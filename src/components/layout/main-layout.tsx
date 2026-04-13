@@ -1,6 +1,7 @@
 'use client'
 
 import { useAppStore } from '@/store/app-store'
+import { AppSidebar } from '@/components/layout/app-sidebar'
 import { LandingView } from '@/components/views/landing-view'
 import { LoginView } from '@/components/views/login-view'
 import { RegisterView } from '@/components/views/register-view'
@@ -10,6 +11,7 @@ import { TransactionsView } from '@/components/views/transactions-view'
 import { RewardsView } from '@/components/views/rewards-view'
 import { SettingsView } from '@/components/views/settings-view'
 import { PublicCheckInView } from '@/components/views/public-checkin-view'
+import { NotificationsView } from '@/components/views/notifications-view'
 
 const views: Record<string, React.ComponentType<any>> = {
   landing: LandingView,
@@ -21,6 +23,7 @@ const views: Record<string, React.ComponentType<any>> = {
   rewards: RewardsView,
   settings: SettingsView,
   'public-checkin': PublicCheckInView,
+  notifications: NotificationsView,
 }
 
 export function MainLayout() {
@@ -46,6 +49,14 @@ export function MainLayout() {
     return <LandingView />
   }
 
+  // Authenticated layout with sidebar
   const ViewComponent = views[currentView]
-  return ViewComponent ? <ViewComponent /> : <DashboardView />
+  return (
+    <div className="flex min-h-screen">
+      <AppSidebar />
+      <main className="flex-1 p-6 bg-gray-50 overflow-auto">
+        {ViewComponent ? <ViewComponent /> : <DashboardView />}
+      </main>
+    </div>
+  )
 }

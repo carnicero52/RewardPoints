@@ -132,7 +132,7 @@ export function PublicCheckInView() {
               <QrCode className="h-8 w-8 text-purple-400" />
             </div>
           </div>
-          <h1 className="text-2xl font-bold">FideliQR</h1>
+          <h1 className="text-2xl font-bold">RewardPoints</h1>
           {businessName && (
             <p className="text-purple-200">{businessName}</p>
           )}

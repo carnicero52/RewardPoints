@@ -8,7 +8,6 @@ export async function GET(request: NextRequest) {
 
     const customers = await db.customer.findMany({
       where: { businessId, active: true },
-      orderBy: { createdAt: 'desc' },
       select: {
         id: true,
         name: true,
@@ -16,8 +15,8 @@ export async function GET(request: NextRequest) {
         phone: true,
         totalPoints: true,
         totalVisits: true,
-        createdAt: true,
       },
+      orderBy: { createdAt: 'desc' },
     })
 
     return NextResponse.json(customers)

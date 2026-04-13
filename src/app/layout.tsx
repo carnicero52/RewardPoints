@@ -7,7 +7,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "FideliQR - Plataforma de Fidelización",
+  title: "RewardPoints - Plataforma de Fidelización",
   description: "Sistema de fidelización con códigos QR para tu negocio",
 }
 

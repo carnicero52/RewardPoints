@@ -45,7 +45,7 @@ export function LoginView() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-900 via-indigo-900 to-violet-800 p-4">
       <Card className="w-full max-w-md bg-white/10 backdrop-blur border-purple-500/30">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl text-white">FideliQR</CardTitle>
+          <CardTitle className="text-2xl text-white">RewardPoints</CardTitle>
           <CardDescription className="text-purple-200">
             Ingresa a tu cuenta
           </CardDescription>

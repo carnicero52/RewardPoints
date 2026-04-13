@@ -57,6 +57,7 @@ model Business {
   staff       Staff[]
   rewards     Reward[]
   notifications Notification[]
+  qRCodes       QRCode[]
 
   @@index([slug])
 }
