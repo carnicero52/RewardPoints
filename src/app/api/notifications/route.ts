@@ -6,7 +6,7 @@ export async function POST(request: NextRequest) {
   try {
     const { businessId } = getAuthPayload(request)
     const body = await request.json()
-    const { type, title, message, channel, customerIds } = body
+    const { type, title, message, channel, customerIds, scheduledAt, customerFilter } = body
 
     if (!title?.trim() || !message?.trim()) {
       return NextResponse.json({ error: 'Title and message required' }, { status: 400 })
@@ -23,6 +23,10 @@ export async function POST(request: NextRequest) {
       targetCustomerIds = allCustomers.map(c => c.id)
     }
 
+    // If scheduled, set status to 'scheduled' instead of 'pending'
+    const isScheduled = scheduledAt && new Date(scheduledAt) > new Date()
+    const status = isScheduled ? 'scheduled' : 'pending'
+    
     // Create notifications for each customer
     const notifications = await Promise.all(
       targetCustomerIds.map((customerId: string) =>
@@ -34,16 +38,18 @@ export async function POST(request: NextRequest) {
             title: title.trim(),
             message: message.trim(),
             channel: channel || 'email',
-            status: 'pending',
+            status,
+            scheduledAt: isScheduled ? new Date(scheduledAt) : null,
           },
         })
       )
     )
 
+    const action = isScheduled ? 'programadas' : 'enviadas'
     return NextResponse.json({
       success: true,
       sent: notifications.length,
-      message: `${notifications.length} notificaciones creadas`,
+      message: `${notifications.length} notificaciones ${action}`,
     })
   } catch (error: any) {
     console.error('Notifications POST error:', error)
@@ -64,8 +70,6 @@ export async function GET(request: NextRequest) {
       where,
       orderBy: { createdAt: 'desc' },
       take: 100,
-      include: {
-      },
     })
 
     return NextResponse.json(notifications)

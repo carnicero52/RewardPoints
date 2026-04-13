@@ -192,6 +192,7 @@ model Notification {
   // Status
   status      String   @default("pending") // pending, sent, failed
   sentAt      DateTime?
+  scheduledAt DateTime?
 
   createdAt   DateTime @default(now())
 

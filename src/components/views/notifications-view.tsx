@@ -1,35 +1,56 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { toast } from 'sonner'
-import { Send, Mail, MessageSquare } from 'lucide-react'
+import { Send, Mail, MessageSquare, Calendar, Users, Clock, SendHorizontal } from 'lucide-react'
+import { format } from 'date-fns'
+import { es } from 'date-fns/locale'
 
 interface Customer {
   id: string
   name: string
   email: string
   phone: string
+  telegram?: string
 }
 
 const authHeaders = () => ({
   Authorization: `Bearer ${localStorage.getItem('royalty_token')}`,
 })
 
+type NotificationType = 'marketing' | 'collection' | 'reminder' | 'promotion' | 'birthday'
+type Channel = 'email' | 'telegram' | 'callmebot' | 'all'
+
 export function NotificationsView() {
   const [customers, setCustomers] = useState<Customer[]>([])
   const [loading, setLoading] = useState(true)
   const [sending, setSending] = useState(false)
+  const [showScheduler, setShowScheduler] = useState(false)
+  const [customerFilter, setCustomerFilter] = useState<'all' | 'specific'>('all')
+  
   const [form, setForm] = useState({
-    type: 'marketing',
+    // Notification content
+    type: 'marketing' as NotificationType,
     title: '',
     message: '',
-    channel: 'email',
+    channel: 'all' as Channel,
+    
+    // Scheduling
+    scheduled: false,
+    scheduleDate: '',
+    scheduleTime: '',
+    
+    // Customer selection
     customerIds: [] as string[],
+    customerFilter: 'all' as 'all' | 'specific',
   })
 
   useEffect(() => {
@@ -46,18 +67,46 @@ export function NotificationsView() {
       return
     }
 
+    if (form.customerFilter === 'specific' && form.customerIds.length === 0) {
+      toast.error('Selecciona al menos un cliente')
+      return
+    }
+
+    if (form.scheduled && (!form.scheduleDate || !form.scheduleTime)) {
+      toast.error('Configura fecha y hora programada')
+      return
+    }
+
     setSending(true)
     try {
+      const payload = {
+        ...form,
+        // If scheduled, send the schedule datetime
+        scheduledAt: form.scheduled ? `${form.scheduleDate}T${form.scheduleTime}:00` : null,
+      }
+      
       const res = await fetch('/api/notifications', {
         method: 'POST',
         headers: { ...authHeaders(), 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify(payload),
       })
 
       if (!res.ok) throw new Error('Error sending notifications')
 
-      toast.success('Notificaciones enviadas')
-      setForm({ ...form, title: '', message: '', customerIds: [] })
+      if (form.scheduled) {
+        toast.success(`Notificación programada para ${form.scheduleDate} a las ${form.scheduleTime}`)
+      } else {
+        toast.success('Notificaciones enviadas')
+      }
+      
+      setForm({
+        ...form,
+        title: '',
+        message: '',
+        customerIds: [],
+        scheduleDate: '',
+        scheduleTime: '',
+      })
     } catch (error: any) {
       toast.error(error.message)
     } finally {
@@ -74,109 +123,235 @@ export function NotificationsView() {
     }))
   }
 
-  return (
-    <div className="space-y-6 max-w-2xl">
-      <h1 className="text-2xl font-bold">Enviar Notificaciones</h1>
+  const selectAllCustomers = () => {
+    setForm(prev => ({
+      ...prev,
+      customerIds: customers.map(c => c.id)
+    }))
+  }
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Configurar mensaje</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+  const clearAllCustomers = () => {
+    setForm(prev => ({
+      ...prev,
+      customerIds: []
+    }))
+  }
+
+  if (loading) return <div className="p-8 text-center">Cargando...</div>
+
+  return (
+    <div className="space-y-6 max-w-4xl">
+      <div>
+        <h1 className="text-2xl font-bold">Enviar Notificaciones</h1>
+        <p className="text-muted-foreground">Crea y programa notificaciones para tus clientes</p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Notification Content */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <SendHorizontal className="h-5 w-5" />
+              Mensaje
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
             <div>
               <Label>Tipo de notificación</Label>
-              <select
-                className="w-full p-2 border rounded"
-                value={form.type}
-                onChange={(e) => setForm({ ...form, type: e.target.value })}
-              >
-                <option value="marketing">Marketing</option>
-                <option value="collection">Cobranza</option>
-                <option value="reminder">Recordatorio</option>
-                <option value="system">Sistema</option>
-              </select>
+              <Select value={form.type} onValueChange={(v) => setForm({...form, type: v as NotificationType})}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="marketing">📢 Marketing</SelectItem>
+                  <SelectItem value="promotion">🔥 Promoción</SelectItem>
+                  <SelectItem value="collection">💰 Cobranza</SelectItem>
+                  <SelectItem value="reminder">⏰ Recordatorio</SelectItem>
+                  <SelectItem value="birthday">🎂 Cumpleaños</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
+
             <div>
-              <Label>Canal</Label>
-              <select
-                className="w-full p-2 border rounded"
-                value={form.channel}
-                onChange={(e) => setForm({ ...form, channel: e.target.value })}
-              >
-                <option value="email">Email</option>
-                <option value="telegram">Telegram</option>
-              </select>
+              <Label>Título</Label>
+              <Input 
+                value={form.title}
+                onChange={(e) => setForm({...form, title: e.target.value})}
+                placeholder="Ej: ¡Nueva promoción!"
+              />
             </div>
-          </div>
 
-          <div>
-            <Label>Título</Label>
-            <Input
-              value={form.title}
-              onChange={(e) => setForm({ ...form, title: e.target.value })}
-              placeholder="Ej: ¡Nueva promoción!"
-            />
-          </div>
+            <div>
+              <Label>Mensaje</Label>
+              <Textarea 
+                value={form.message}
+                onChange={(e) => setForm({...form, message: e.target.value})}
+                placeholder="Escribe tu mensaje..."
+                rows={4}
+              />
+            </div>
 
-          <div>
-            <Label>Mensaje</Label>
-            <textarea
-              className="w-full p-2 border rounded min-h-[100px]"
-              value={form.message}
-              onChange={(e) => setForm({ ...form, message: e.target.value })}
-              placeholder="Escribe tu mensaje..."
-            />
-          </div>
-        </CardContent>
-      </Card>
+            <div>
+              <Label>Canal de envío</Label>
+              <Select value={form.channel} onValueChange={(v) => setForm({...form, channel: v as Channel})}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">📨 Todos los disponibles</SelectItem>
+                  <SelectItem value="email">📧 Solo Email</SelectItem>
+                  <SelectItem value="telegram">✈️ Solo Telegram</SelectItem>
+                  <SelectItem value="callmebot">💬 CallMeBot (WhatsApp)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </CardContent>
+        </Card>
 
+        {/* Scheduling */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Calendar className="h-5 w-5" />
+              Programar
+            </CardTitle>
+            <CardDescription>Enviar ahora o en una fecha específica</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center gap-2">
+              <Checkbox 
+                id="scheduled"
+                checked={form.scheduled}
+                onCheckedChange={(v) => setForm({...form, scheduled: v === true})}
+              />
+              <Label htmlFor="scheduled">Programar envío</Label>
+            </div>
+
+            {form.scheduled && (
+              <div className="grid grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-2">
+                <div>
+                  <Label>Fecha</Label>
+                  <Input 
+                    type="date"
+                    value={form.scheduleDate}
+                    onChange={(e) => setForm({...form, scheduleDate: e.target.value})}
+                    min={new Date().toISOString().split('T')[0]}
+                  />
+                </div>
+                <div>
+                  <Label>Hora</Label>
+                  <Input 
+                    type="time"
+                    value={form.scheduleTime}
+                    onChange={(e) => setForm({...form, scheduleTime: e.target.value})}
+                  />
+                </div>
+              </div>
+            )}
+
+            {!form.scheduled && (
+              <div className="text-sm text-muted-foreground bg-muted p-3 rounded-lg">
+                <Clock className="h-4 w-4 inline mr-1" />
+                Se enviará inmediatamente al confirmar
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Customer Selection */}
       <Card>
         <CardHeader>
-          <CardTitle>Seleccionar clientes ({form.customerIds.length} seleccionados)</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <Users className="h-5 w-5" />
+            Destinatarios
+          </CardTitle>
         </CardHeader>
-        <CardContent>
-          {loading ? (
-            <p>Cargando...</p>
-          ) : customers.length === 0 ? (
-            <p className="text-muted-foreground">No hay clientes</p>
-          ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-60 overflow-auto">
-              {customers.map(customer => (
-                <button
-                  key={customer.id}
-                  onClick={() => toggleCustomer(customer.id)}
-                  className={`p-2 text-left rounded border ${
-                    form.customerIds.includes(customer.id)
-                      ? 'bg-pink-100 border-pink-500'
-                      : 'bg-white border-gray-200'
-                  }`}
-                >
-                  <p className="font-medium text-sm truncate">{customer.name}</p>
-                  <p className="text-xs text-muted-foreground truncate">{customer.email || customer.phone}</p>
-                </button>
-              ))}
-            </div>
-          )}
-          <div className="mt-4 flex gap-2">
-            <Button variant="outline" onClick={() => setForm(prev => ({ ...prev, customerIds: customers.map(c => c.id) }))}>
-              Seleccionar todos
+        <CardContent className="space-y-4">
+          <div className="flex gap-2">
+            <Button 
+              variant={customerFilter === 'all' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => {
+                setCustomerFilter('all')
+                selectAllCustomers()
+              }}
+            >
+              <Users className="h-4 w-4 mr-1" />
+              Todos los clientes ({customers.length})
             </Button>
-            <Button variant="outline" onClick={() => setForm(prev => ({ ...prev, customerIds: [] }))}>
-              Limpiar
+            <Button 
+              variant={customerFilter === 'specific' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => {
+                setCustomerFilter('specific')
+                clearAllCustomers()
+              }}
+            >
+              <Users className="h-4 w-4 mr-1" />
+              Seleccionar específicos
             </Button>
           </div>
+
+          {customerFilter === 'specific' && (
+            <div className="border rounded-lg max-h-64 overflow-y-auto p-2 space-y-2">
+              {customers.map(customer => (
+                <div key={customer.id} className="flex items-center gap-2 p-2 hover:bg-muted rounded">
+                  <Checkbox 
+                    id={customer.id}
+                    checked={form.customerIds.includes(customer.id)}
+                    onCheckedChange={() => toggleCustomer(customer.id)}
+                  />
+                  <Label htmlFor={customer.id} className="flex-1 cursor-pointer">
+                    <span className="font-medium">{customer.name}</span>
+                    <span className="text-muted-foreground text-sm ml-2">
+                      {customer.email} {customer.phone && `| ${customer.phone}`}
+                    </span>
+                  </Label>
+                </div>
+              ))}
+              {customers.length === 0 && (
+                <p className="text-center text-muted-foreground py-4">No hay clientes registrados</p>
+              )}
+            </div>
+          )}
+
+          {customerFilter === 'all' && (
+            <div className="text-sm text-muted-foreground bg-muted p-3 rounded-lg">
+              📢 Se notificará a todos los {customers.length} clientes
+            </div>
+          )}
+
+          {customerFilter === 'specific' && form.customerIds.length > 0 && (
+            <div className="text-sm text-muted-foreground">
+              ✓ {form.customerIds.length} cliente(s) seleccionado(s)
+            </div>
+          )}
         </CardContent>
       </Card>
 
-      <Button 
-        onClick={handleSend} 
-        disabled={sending || form.customerIds.length === 0}
-        className="w-full"
-      >
-        <Send className="h-4 w-4 mr-2" />
-        {sending ? 'Enviando...' : `Enviar a ${form.customerIds.length} cliente(s)`}
-      </Button>
+      {/* Send Button */}
+      <div className="flex justify-end gap-2">
+        <Button 
+          size="lg"
+          onClick={handleSend}
+          disabled={sending}
+        >
+          {sending ? (
+            <>Enviando...</>
+          ) : form.scheduled ? (
+            <>
+              <Calendar className="h-5 w-5 mr-2" />
+              Programar notificación
+            </>
+          ) : (
+            <>
+              <Send className="h-5 w-5 mr-2" />
+              Enviar ahora
+            </>
+          )}
+        </Button>
+      </div>
     </div>
   )
 }
