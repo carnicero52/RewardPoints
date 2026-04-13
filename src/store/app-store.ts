@@ -1,5 +1,6 @@
+'use client'
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware/persist'
+import { persist, createJSONStorage } from 'zustand/middleware'
 
 export type ViewType = 
   | 'landing'
@@ -11,6 +12,7 @@ export type ViewType =
   | 'rewards'
   | 'settings'
   | 'public-checkin'
+  | 'superadmin'
   | 'notifications'
 
 interface User {
@@ -27,6 +29,8 @@ interface AppState {
   businessName: string
   businessLogo: string
   currentView: ViewType
+  sidebarOpen: boolean
+  toggleSidebar: () => void
   viewParams: Record<string, string>
 
   login: (user: User) => void
@@ -44,6 +48,8 @@ export const useAppStore = create<AppState>()(
       businessLogo: '',
       currentView: 'landing',
       viewParams: {},
+      toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
+  sidebarOpen: true,
 
       login: (user) => set({ 
         user, 
@@ -76,6 +82,7 @@ export const useAppStore = create<AppState>()(
     }),
     {
       name: 'royalty-qr-store',
+      storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         user: state.user,
         isAuthenticated: state.isAuthenticated,

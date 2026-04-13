@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
 
     // Create notifications for each customer
     const notifications = await Promise.all(
-      targetCustomerIds.map(customerId =>
+      targetCustomerIds.map((customerId: string) =>
         db.notification.create({
           data: {
             businessId,
@@ -65,7 +65,6 @@ export async function GET(request: NextRequest) {
       orderBy: { createdAt: 'desc' },
       take: 100,
       include: {
-        customer: { select: { name: true } },
       },
     })
 
