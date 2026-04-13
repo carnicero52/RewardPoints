@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { toast } from 'sonner'
+import { useAppStore } from '@/store/app-store'
 import { Save, Palette, Gift, Bell, QrCode, Link, RefreshCw } from 'lucide-react'
 
 const authHeaders = () => ({
@@ -15,6 +16,7 @@ const authHeaders = () => ({
 })
 
 export function SettingsView() {
+  const { navigate } = useAppStore()
   const [business, setBusiness] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -101,6 +103,7 @@ export function SettingsView() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
+          <Button variant="ghost" onClick={() => navigate("dashboard")} className="mr-2">← Volver</Button>
           <h1 className="text-2xl font-bold">Configuración</h1>
           <p className="text-muted-foreground">Personaliza tu negocio</p>
         </div>
