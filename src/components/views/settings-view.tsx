@@ -1,5 +1,6 @@
 'use client'
 
+import { QRCodeSVG } from 'qrcode.react'
 import { useEffect, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -7,7 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { toast } from 'sonner'
-import { Save, Palette, Gift, Bell, QrCode, Link } from 'lucide-react'
+import { Save, Palette, Gift, Bell, QrCode, Link, RefreshCw } from 'lucide-react'
 
 const authHeaders = () => ({
   Authorization: `Bearer ${localStorage.getItem('royalty_token')}`,
@@ -369,23 +370,54 @@ export function SettingsView() {
           <Card>
             <CardHeader>
               <CardTitle>Código QR Público</CardTitle>
-              <CardDescription> QR que escanean tus clientes</CardDescription>
+              <CardDescription>QR que escanean tus clientes</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="bg-gray-100 p-8 rounded-lg text-center">
-                <QrCode className="h-32 w-32 mx-auto text-gray-400" />
-                <p className="mt-4 text-muted-foreground">
-                  Tu código QR se generará automáticamente
-                </p>
-                <p className="text-sm text-muted-foreground mt-2">
-                  URL: {typeof window !== 'undefined' ? window.location.origin : ''}/checkin?qr={form.slug}
-                </p>
+              <div className="bg-white p-8 rounded-lg text-center border-2 border-dashed border-gray-300">
+                {form.slug ? (
+                  <>
+                    <QRCodeSVG 
+                      value={`${typeof window !== 'undefined' ? window.location.origin : ''}/checkin?qr=${form.slug}`}
+                      size={200}
+                      level="H"
+                      includeMargin
+                      className="mx-auto"
+                    />
+                    <p className="mt-4 text-sm text-muted-foreground font-mono break-all">
+                      /checkin?qr={form.slug}
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <QrCode className="h-32 w-32 mx-auto text-gray-400" />
+                    <p className="mt-4 text-muted-foreground">
+                      Configura el slug del negocio para generar el QR
+                    </p>
+                  </>
+                )}
               </div>
-              <div className="text-sm text-muted-foreground">
-                <p>Comparte este enlace con tus clientes:</p>
-                <code className="block bg-gray-100 p-2 rounded mt-2 break-all">
-                  {typeof window !== 'undefined' ? window.location.origin : ''}/checkin?qr={form.slug}
-                </code>
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    const url = `${window.location.origin}/checkin?qr=${form.slug}`;
+                    navigator.clipboard.writeText(url);
+                    toast.success('URL copiada al portapapeles');
+                  }}
+                >
+                  <Link className="h-4 w-4 mr-2" />
+                  Copiar URL
+                </Button>
+                <Button 
+                  variant="outline"
+                  onClick={() => {
+                    setForm({...form, slug: form.slug + '-' + Date.now()});
+                    toast.success('QR regenerado');
+                  }}
+                >
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Regenerar
+                </Button>
               </div>
             </CardContent>
           </Card>
