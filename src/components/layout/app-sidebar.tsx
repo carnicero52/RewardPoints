@@ -70,7 +70,7 @@ export function AppSidebar() {
   const toggleTheme = () => {
     const newDark = !isDark
     setIsDark(newDark)
-    document.documentElement.classList.toggle('dark', newDark)
+    if (newDark) { document.documentElement.classList.remove('light'); document.documentElement.classList.add('dark'); } else { document.documentElement.classList.remove('dark'); document.documentElement.classList.add('light'); }
     localStorage.setItem('theme', newDark ? 'dark' : 'light')
   }
 
