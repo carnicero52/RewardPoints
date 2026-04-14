@@ -20,7 +20,7 @@ export function SettingsView() {
   const [business, setBusiness] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [activeTab, setActiveTab] = useState('general')
+  const [activeTab, setActiveTab] = useState('qr')
 
   const [form, setForm] = useState({
     // General
@@ -103,7 +103,7 @@ export function SettingsView() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <Button variant="ghost" onClick={() => navigate("dashboard")} className="mr-2">← Volver</Button>
+          <Button variant="ghost" onClick={() => { console.log("Navigate to dashboard"); navigate("dashboard"); }} className="mr-2">← Volver</Button>
           <h1 className="text-2xl font-bold">Configuración</h1>
           <p className="text-muted-foreground">Personaliza tu negocio</p>
         </div>
