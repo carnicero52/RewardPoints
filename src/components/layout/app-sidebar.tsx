@@ -14,7 +14,7 @@ const navItems: { icon: any; label: string; view: ViewType }[] = [
   { icon: Users, label: 'Clientes', view: 'customers' },
   { icon: ShoppingCart, label: 'Transacciones', view: 'transactions' },
   { icon: Gift, label: 'Premios', view: 'rewards' },
-  { icon: QrCode, label: 'QR Público', view: 'public-checkin' },
+  { icon: QrCode, label: 'Ver código QR', view: 'settings' },
   { icon: Bell, label: 'Notificaciones', view: 'notifications' },
   { icon: Settings, label: 'Configuración', view: 'settings' },
 ]
