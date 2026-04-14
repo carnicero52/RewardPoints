@@ -42,7 +42,7 @@ export function LoginView() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-900 via-indigo-900 to-violet-800 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br dark:from-purple-900 dark:via-indigo-900 dark:to-violet-800 from-gray-100 via-gray-200 to-gray-300 p-4">
       <Card className="w-full max-w-md bg-white/10 backdrop-blur border-purple-500/30">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl text-white">RewardPoints</CardTitle>

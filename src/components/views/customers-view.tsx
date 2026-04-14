@@ -110,7 +110,7 @@ export function CustomersView() {
           <p className="text-muted-foreground">No hay clientes registrados</p>
         ) : (
           filtered.map(customer => (
-            <Card key={customer.id} className="bg-gradient-to-r from-purple-900/50 to-indigo-900/50 border-purple-500/30">
+            <Card key={customer.id} className="bg-gradient-to-r dark:from-purple-900/50 dark:to-indigo-900/50 from-gray-100 to-gray-200 border-purple-500/30">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">

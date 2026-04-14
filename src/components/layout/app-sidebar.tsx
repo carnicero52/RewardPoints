@@ -76,7 +76,7 @@ export function AppSidebar() {
 
   return (
     <div className={cn(
-      "flex flex-col h-screen bg-gradient-to-b from-purple-900 to-indigo-900 transition-all duration-300",
+      "flex flex-col h-screen bg-gradient-to-b var(--sidebar-bg) transition-all duration-300",
       sidebarOpen ? "w-64" : "w-16"
     )}>
       {/* Toggle & Theme Buttons */}
