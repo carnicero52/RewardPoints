@@ -92,6 +92,8 @@ model Customer {
   name         String
   email        String?
   phone        String?
+  telegram     String?
+  callmebot    String?
   totalPoints  Int      @default(0)
   totalVisits  Int      @default(0)
 
