@@ -29,12 +29,29 @@ export async function PUT(request: NextRequest) {
     const business = await db.business.update({
       where: { id: businessId },
       data: {
+        // General
         name: body.name,
+        slug: body.slug,
+        logo: body.logo,
+        brandColor: body.brandColor,
+        description: body.description,
+        email: body.email,
+        phone: body.phone,
+        // Points
         pointsPerPurchase: body.pointsPerPurchase,
         pointsForReward: body.pointsForReward,
         rewardDescription: body.rewardDescription,
+        // SMTP
         smtpEnabled: body.smtpEnabled,
+        smtpHost: body.smtpHost,
+        smtpPort: body.smtpPort,
+        smtpUser: body.smtpUser,
+        smtpPassword: body.smtpPassword,
+        smtpFrom: body.smtpFrom,
+        // Telegram
         telegramEnabled: body.telegramEnabled,
+        telegramBotToken: body.telegramBotToken,
+        telegramChatId: body.telegramChatId,
       },
     })
 
