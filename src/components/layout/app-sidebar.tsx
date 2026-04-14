@@ -1,7 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useTheme } from 'next-themes'
+import { useState, useEffect } from 'react'
 import { useAppStore, type ViewType } from '@/store/app-store'
 import { 
   LayoutDashboard, Users, ShoppingCart, Gift, Settings, 
@@ -35,9 +34,18 @@ const timezones = [
 
 export function AppSidebar() {
   const { currentView, navigate, user, businessName, businessLogo, logout, sidebarOpen, toggleSidebar } = useAppStore()
-  const { theme, setTheme } = useTheme()
   const [currentTime, setCurrentTime] = useState('')
   const [timezone, setTimezone] = useState('America/Caracas')
+  const [isDark, setIsDark] = useState(true)
+
+  useEffect(() => {
+    // Load saved theme
+    const saved = localStorage.getItem('theme')
+    if (saved === 'light') {
+      setIsDark(false)
+      document.documentElement.classList.remove('dark')
+    }
+  }, [])
 
   useEffect(() => {
     const updateTime = () => {
@@ -59,6 +67,13 @@ export function AppSidebar() {
     return () => clearInterval(interval)
   }, [timezone])
 
+  const toggleTheme = () => {
+    const newDark = !isDark
+    setIsDark(newDark)
+    document.documentElement.classList.toggle('dark', newDark)
+    localStorage.setItem('theme', newDark ? 'dark' : 'light')
+  }
+
   return (
     <div className={cn(
       "flex flex-col h-screen bg-gradient-to-b from-purple-900 to-indigo-900 transition-all duration-300",
@@ -77,11 +92,11 @@ export function AppSidebar() {
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+          onClick={toggleTheme}
           className="w-full text-purple-200 hover:text-white hover:bg-white/10"
-          title={theme === 'dark' ? 'Modo claro' : 'Modo oscuro'}
+          title={isDark ? 'Modo claro' : 'Modo oscuro'}
         >
-          {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+          {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
         </Button>
       </div>
 
