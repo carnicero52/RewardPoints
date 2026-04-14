@@ -5,9 +5,10 @@ import { useTheme } from 'next-themes'
 import { useAppStore, type ViewType } from '@/store/app-store'
 import { 
   LayoutDashboard, Users, ShoppingCart, Gift, Settings, 
-  QrCode, Bell, ChevronLeft, ChevronRight, LogOut, Moon, Sun
+  QrCode, Bell, ChevronLeft, ChevronRight, LogOut, Moon, Sun, Globe
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { cn } from '@/lib/utils'
 
 const navItems: { icon: any; label: string; view: ViewType }[] = [
@@ -20,22 +21,50 @@ const navItems: { icon: any; label: string; view: ViewType }[] = [
   { icon: Settings, label: 'Configuración', view: 'settings' },
 ]
 
+const timezones = [
+  { value: 'America/Caracas', label: 'Caracas (VEN)' },
+  { value: 'America/Mexico_City', label: 'Ciudad de México (MEX)' },
+  { value: 'America/Bogota', label: 'Bogotá (COL)' },
+  { value: 'America/Lima', label: 'Lima (PER)' },
+  { value: 'America/Buenos_Aires', label: 'Buenos Aires (ARG)' },
+  { value: 'America/Santiago', label: 'Santiago (CHI)' },
+  { value: 'America/New_York', label: 'Nueva York (USA)' },
+  { value: 'Europe/Madrid', label: 'Madrid (ESP)' },
+  { value: 'Europe/London', label: 'Londres (GBR)' },
+]
+
 export function AppSidebar() {
-  const { currentView, navigate, user, businessName, logout, sidebarOpen, toggleSidebar } = useAppStore()
+  const { currentView, navigate, user, businessName, businessLogo, logout, sidebarOpen, toggleSidebar } = useAppStore()
   const { theme, setTheme } = useTheme()
   const [currentTime, setCurrentTime] = useState('')
+  const [timezone, setTimezone] = useState('America/Caracas')
 
   useEffect(() => {
-    const now = new Date()
-    setCurrentTime(now.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' }))
-  }, [])
+    const updateTime = () => {
+      const now = new Date()
+      try {
+        setCurrentTime(now.toLocaleTimeString('es', { 
+          timeZone: timezone,
+          hour: '2-digit', 
+          minute: '2-digit',
+          second: '2-digit'
+        }))
+      } catch {
+        setCurrentTime(now.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' }))
+      }
+    }
+    
+    updateTime()
+    const interval = setInterval(updateTime, 1000)
+    return () => clearInterval(interval)
+  }, [timezone])
 
   return (
     <div className={cn(
       "flex flex-col h-screen bg-gradient-to-b from-purple-900 to-indigo-900 transition-all duration-300",
       sidebarOpen ? "w-64" : "w-16"
     )}>
-      {/* Toggle Button */}
+      {/* Toggle & Theme Buttons */}
       <div className="p-2 space-y-1">
         <Button
           variant="ghost"
@@ -56,12 +85,16 @@ export function AppSidebar() {
         </Button>
       </div>
 
-      {/* Logo Section */}
+      {/* Logo & Business Info Section */}
       {sidebarOpen && (
         <div className="flex items-center gap-3 px-4 py-4 border-b border-white/10">
-          <div className="h-10 w-10 rounded-lg bg-pink-500/20 flex items-center justify-center">
-            <Gift className="h-6 w-6 text-pink-400" />
-          </div>
+          {businessLogo ? (
+            <img src={businessLogo} alt="Logo" className="h-10 w-10 rounded-lg object-cover" />
+          ) : (
+            <div className="h-10 w-10 rounded-lg bg-pink-500/20 flex items-center justify-center">
+              <Gift className="h-6 w-6 text-pink-400" />
+            </div>
+          )}
           <div className="flex-1 min-w-0">
             <h1 className="text-sm font-bold text-white truncate">{businessName}</h1>
             <p className="text-xs text-purple-300 truncate">RewardPoints</p>
@@ -69,10 +102,31 @@ export function AppSidebar() {
         </div>
       )}
 
-      {/* Time */}
+      {/* Time & Timezone */}
       {sidebarOpen && (
-        <div className="px-4 py-2 text-center text-purple-300 text-sm">
-          {currentTime}
+        <div className="px-4 py-2 space-y-2">
+          <div className="text-center text-white text-lg font-mono">
+            {currentTime}
+          </div>
+          <Select value={timezone} onValueChange={setTimezone}>
+            <SelectTrigger className="h-8 bg-white/10 text-purple-200 border-purple-500/30 text-xs">
+              <Globe className="h-3 w-3 mr-1" />
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="bg-gray-900 border-gray-700">
+              {timezones.map(tz => (
+                <SelectItem key={tz.value} value={tz.value} className="text-gray-200 text-xs">
+                  {tz.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+
+      {!sidebarOpen && (
+        <div className="px-2 py-2 text-center text-white text-sm font-mono">
+          {currentTime.split(':').slice(0,2).join(':')}
         </div>
       )}
 
