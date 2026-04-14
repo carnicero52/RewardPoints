@@ -103,7 +103,7 @@ export function SettingsView() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <Button variant="ghost" onClick={() => { console.log("Navigate to dashboard"); navigate("dashboard"); }} className="mr-2">← Volver</Button>
+          <Button variant="ghost" onClick={() => useAppStore.getState().navigate("dashboard")} className="mr-2">← Volver</Button>
           <h1 className="text-2xl font-bold">Configuración</h1>
           <p className="text-muted-foreground">Personaliza tu negocio</p>
         </div>
