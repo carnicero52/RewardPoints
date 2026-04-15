@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { toast } from 'sonner'
 
 export function LoginView() {
-  const { login, navigate } = useAppStore()
+  const { login, navigate, setBusiness } = useAppStore()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -33,6 +33,11 @@ export function LoginView() {
 
       localStorage.setItem('royalty_token', data.token)
       login(data.user)
+      
+      if (data.user.businessName || data.user.businessLogo) {
+        setBusiness(data.user.businessName, data.user.businessLogo)
+      }
+      
       toast.success(`Welcome, ${data.user.name}!`)
     } catch (error: any) {
       toast.error(error.message)
