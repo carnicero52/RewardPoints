@@ -188,8 +188,11 @@ export async function POST(request: NextRequest) {
         name: business.name,
         logo: business.logo,
         brandColor: business.brandColor,
+        pointsForReward: business.pointsForReward,
         rewardDescription: business.rewardDescription,
         rewardImageUrl: business.rewardImageUrl,
+        frequency: business.frequency,
+        cooldownHours: business.cooldownHours,
       },
       checkIn: checkInResult,
       progress: {
