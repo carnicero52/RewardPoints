@@ -46,10 +46,7 @@ export default function SuperAdminPage() {
   const [loading, setLoading] = useState(false)
   const [viewBusiness, setViewBusiness] = useState<DetailedBusiness | null>(null)
 
-  const superHeaders = () => ({
-    'Content-Type': 'application/json',
-    'X-Superadmin-Secret': secret,
-  })
+  const superUrl = (path = '') => `/api/superadmin/businesses${path}?secret=${encodeURIComponent(secret)}`
 
   const login = async () => {
     if (!secret.trim()) {
@@ -59,8 +56,8 @@ export default function SuperAdminPage() {
 
     setLoading(true)
     try {
-      const res = await fetch(`/api/superadmin/businesses?secret=${encodeURIComponent(secret)}`, {
-        headers: superHeaders(),
+      const res = await fetch(superUrl(), {
+        headers: { 'Content-Type': 'application/json' },
       })
 
       if (!res.ok) throw new Error('Clave incorrecta')
@@ -80,7 +77,7 @@ export default function SuperAdminPage() {
     try {
       const res = await fetch(`/api/superadmin/businesses/${businessId}`, {
         method: 'PUT',
-        headers: { ...superHeaders(), 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ active: !currentActive }),
       })
 
@@ -90,7 +87,7 @@ export default function SuperAdminPage() {
       
       // Refresh list
       const updated = await fetch(`/api/superadmin/businesses?secret=${encodeURIComponent(secret)}`, {
-        headers: superHeaders(),
+        headers: { 'Content-Type': 'application/json' },
       })
       const data = await updated.json()
       setBusinesses(data.businesses || data)

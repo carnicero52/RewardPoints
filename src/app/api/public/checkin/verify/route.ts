@@ -10,7 +10,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Code required' }, { status: 400 })
     }
 
-    const qrCode = await db.qRCode.findFirst({
+    // First try: find by QRCode table
+    let qrCode = await db.qRCode.findFirst({
       where: {
         code,
         active: true,
@@ -21,8 +22,21 @@ export async function GET(request: NextRequest) {
       },
     })
 
+    // Second try: find business by slug (if no QRCode found)
     if (!qrCode) {
-      return NextResponse.json({ error: 'QR code invalid or expired' }, { status: 400 })
+      const business = await db.business.findUnique({
+        where: { slug: code, active: true },
+        select: { id: true, name: true, brandColor: true },
+      })
+
+      if (business) {
+        return NextResponse.json({
+          business,
+          qrCodeId: business.id,
+        })
+      }
+
+      return NextResponse.json({ error: 'QR code or business not found' }, { status: 400 })
     }
 
     return NextResponse.json({
