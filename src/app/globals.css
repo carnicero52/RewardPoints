@@ -101,16 +101,70 @@ body {
 
 .bg-gradient-to-b { background: var(--sidebar-bg) !important; }
 
-/* Override more hardcoded white backgrounds */
-.bg-gray-100, .bg-gray-200, .bg-slate-50, .bg-slate-100 { background: var(--background) !important; }
-.bg-white, .bg-white\/100 { background: var(--card) !important; }
-.from-gray-100, .from-gray-200 { background: var(--background) !important; }
-.bg-purple-500\/10, .bg-purple-500\/20 { background: var(--card) !important; }
-.bg-purple-900\/50, .bg-purple-900\/30 { background: var(--secondary) !important; }
-.bg-indigo-900\/50 { background: var(--secondary) !important; }
-.bg-gradient-to-br { background: var(--background) !important; }
-.from-purple-900, .from-indigo-900 { background: var(--background) !important; }
-.via-indigo-900, .to-violet-800 { background: var(--secondary) !important; }
+/* Force light mode to use SIGA-RH palette - More aggressive overrides */
+.light {
+  --background: #e2e8f0 !important;
+  --foreground: #0f172a !important;
+  --card: #f8fafc !important;
+  --card-foreground: #0f172a !important;
+  --popover: #f8fafc !important;
+  --popover-foreground: #0f172a !important;
+  --primary: #0d9488 !important;
+  --primary-foreground: #ffffff !important;
+  --secondary: #cbd5e1 !important;
+  --secondary-foreground: #0f172a !important;
+  --muted: #cbd5e1 !important;
+  --muted-foreground: #475569 !important;
+  --accent: #0d9488 !important;
+  --accent-foreground: #ffffff !important;
+  --destructive: #fef2f2 !important;
+  --destructive-foreground: #dc2626 !important;
+  --border: #cbd5e1 !important;
+  --input: #cbd5e1 !important;
+  --ring: #0d9488 !important;
+}
 
-/* Ensure proper text contrast */
-.text-purple-200, .text-purple-300, .text-purple-400 { color: var(--text-secondary) !important; }
+/* Override hardcoded backgrounds */
+.light .bg-white { background-color: #f8fafc !important; }
+.light .bg-gray-50 { background-color: #e2e8f0 !important; }
+.light .bg-gray-100 { background-color: #e2e8f0 !important; }
+.light .bg-gray-200 { background-color: #cbd5e1 !important; }
+.light .bg-slate-50 { background-color: #e2e8f0 !important; }
+.light .bg-slate-100 { background-color: #e2e8f0 !important; }
+
+/* Override gradient backgrounds in public check-in page */
+.light .min-h-screen,
+.light .from-purple-900,
+.light .via-indigo-900,
+.light .to-violet-800,
+.light .bg-gradient-to-br,
+.light .bg-gradient-to-r {
+  background: #e2e8f0 !important;
+}
+
+/* Cards in light mode */
+.light .card,
+.light [class*="Card"],
+.light .rounded-lg,
+.light .rounded-xl {
+  background-color: #f8fafc !important;
+  border-color: #cbd5e1 !important;
+}
+
+/* Text colors that are too light */
+.light .text-gray-500,
+.light .text-gray-400,
+.light .text-gray-300,
+.light .text-slate-400,
+.light .text-slate-300 {
+  color: #475569 !important;
+}
+
+/* Purple-tinted backgrounds to grayscale */
+.light .bg-purple-500\/10,
+.light .bg-purple-500\/20,
+.light .bg-purple-500\/30,
+.light .bg-purple-900\/50,
+.light .bg-purple-900\/30 {
+  background-color: #cbd5e1 !important;
+}
