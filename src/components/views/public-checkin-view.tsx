@@ -163,6 +163,7 @@ export function PublicCheckInView() {
         setCurrentPoints(data.customer.totalPoints ?? 0)
         setTotalVisits(data.customer.totalVisits ?? 0)
         setProgress(data.progress || null)
+        setCooldownInfo(null) // Clear cooldown after successful check-in
         
         if (data.checkIn.pointsEarned && data.checkIn.pointsEarned > 0) {
           toast.success(`🎉 ¡Ganaste ${data.checkIn.pointsEarned} punto(s)!`)
