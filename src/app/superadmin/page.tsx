@@ -5,8 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { toast } from 'sonner'
-import { Building2, Users, Gift, Key, CheckCircle, XCircle } from 'lucide-react'
+import { Building2, Users, Gift, Key, CheckCircle, XCircle, Shield, Clock, Image } from 'lucide-react'
 
 interface Business {
   id: string
@@ -14,9 +15,13 @@ interface Business {
   slug: string
   email: string
   phone: string
-  pointsPerPurchase: number
+  pointsPerFrequency: number
+  frequency: number
   pointsForReward: number
   rewardDescription: string | null
+  rewardImageUrl: string | null
+  cooldownHours: number
+  maxDailyCheckIns: number
   active: boolean
   createdAt: string
 }
@@ -27,12 +32,19 @@ interface Stats {
   totalCustomers: number
 }
 
+interface DetailedBusiness extends Business {
+  customersCount: number
+  transactionsCount: number
+  rewardsRedeemed: number
+}
+
 export default function SuperAdminPage() {
   const [secret, setSecret] = useState('')
   const [authed, setAuthed] = useState(false)
-  const [businesses, setBusinesses] = useState<Business[]>([])
+  const [businesses, setBusinesses] = useState<DetailedBusiness[]>([])
   const [stats, setStats] = useState<Stats | null>(null)
   const [loading, setLoading] = useState(false)
+  const [viewBusiness, setViewBusiness] = useState<DetailedBusiness | null>(null)
 
   const superHeaders = () => ({
     'Content-Type': 'application/json',
@@ -94,6 +106,7 @@ export default function SuperAdminPage() {
           <CardHeader className="text-center">
             <Key className="h-12 w-12 mx-auto text-pink-600 mb-4" />
             <CardTitle className="text-2xl">Super Admin</CardTitle>
+            <p className="text-sm text-muted-foreground">RewardPoints</p>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
@@ -120,7 +133,7 @@ export default function SuperAdminPage() {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold text-white">Panel Super Admin</h1>
-            <p className="text-purple-200">Gestión de todos los negocios</p>
+            <p className="text-purple-200">Gestión de RewardPoints</p>
           </div>
           <Button variant="outline" onClick={() => setAuthed(false)}>
             Cerrar sesión
@@ -183,11 +196,38 @@ export default function SuperAdminPage() {
                         </Badge>
                       </div>
                       <p className="text-purple-200 text-sm">{business.email}</p>
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        <Badge variant="outline" className="text-xs">
+                          <Gift className="h-3 w-3 mr-1" />
+                          {business.pointsForReward} pts para premio
+                        </Badge>
+                        <Badge variant="outline" className="text-xs">
+                          <Clock className="h-3 w-3 mr-1" />
+                          {business.cooldownHours}h cooldown
+                        </Badge>
+                        <Badge variant="outline" className="text-xs">
+                          <Shield className="h-3 w-3 mr-1" />
+                          {business.maxDailyCheckIns}/día
+                        </Badge>
+                        {business.rewardImageUrl && (
+                          <Badge variant="outline" className="text-xs">
+                            <Image className="h-3 w-3 mr-1" />
+                            Imagen
+                          </Badge>
+                        )}
+                      </div>
                       <p className="text-purple-300 text-xs mt-1">
-                        {business.pointsForReward} pts para premio • {business.rewardDescription || 'Sin premio configurado'}
+                        {business.customersCount || 0} clientes • {business.transactionsCount || 0} transacciones
                       </p>
                     </div>
                     <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setViewBusiness(business)}
+                      >
+                        Ver detalles
+                      </Button>
                       <Button
                         size="sm"
                         variant={business.active ? 'destructive' : 'default'}
@@ -202,7 +242,97 @@ export default function SuperAdminPage() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Business Detail Modal */}
+        {viewBusiness && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+            <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>{viewBusiness.name}</CardTitle>
+                  <p className="text-sm text-muted-foreground">{viewBusiness.email}</p>
+                </div>
+                <Button variant="ghost" onClick={() => setViewBusiness(null)}>✕</Button>
+              </CardHeader>
+              <CardContent>
+                <Tabs defaultValue="config">
+                  <TabsList className="w-full">
+                    <TabsTrigger value="config">Configuración</TabsTrigger>
+                    <TabsTrigger value="stats">Estadísticas</TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="config" className="space-y-4 mt-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label>Puntos por frecuencia</Label>
+                        <p className="text-lg font-semibold">{viewBusiness.pointsPerFrequency}</p>
+                      </div>
+                      <div>
+                        <Label>Frecuencia (visitas)</Label>
+                        <p className="text-lg font-semibold">{viewBusiness.frequency}</p>
+                      </div>
+                      <div>
+                        <Label>Puntos para premio</Label>
+                        <p className="text-lg font-semibold">{viewBusiness.pointsForReward}</p>
+                      </div>
+                      <div>
+                        <Label>Premio</Label>
+                        <p className="text-lg font-semibold">{viewBusiness.rewardDescription || 'Sin configurar'}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="border-t pt-4">
+                      <h4 className="font-semibold mb-2">🔒 Anti-trampas</h4>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label>Cooldown (horas)</Label>
+                          <p className="text-lg font-semibold">{viewBusiness.cooldownHours}h</p>
+                        </div>
+                        <div>
+                          <Label>Máx daily check-ins</Label>
+                          <p className="text-lg font-semibold">{viewBusiness.maxDailyCheckIns}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {viewBusiness.rewardImageUrl && (
+                      <div className="border-t pt-4">
+                        <h4 className="font-semibold mb-2">Imagen del premio</h4>
+                        <img 
+                          src={viewBusiness.rewardImageUrl} 
+                          alt="Premio" 
+                          className="w-full h-40 object-cover rounded-lg"
+                        />
+                      </div>
+                    )}
+                  </TabsContent>
+                  
+                  <TabsContent value="stats" className="space-y-4 mt-4">
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="bg-muted p-4 rounded-lg text-center">
+                        <p className="text-2xl font-bold">{viewBusiness.customersCount || 0}</p>
+                        <p className="text-sm text-muted-foreground">Clientes</p>
+                      </div>
+                      <div className="bg-muted p-4 rounded-lg text-center">
+                        <p className="text-2xl font-bold">{viewBusiness.transactionsCount || 0}</p>
+                        <p className="text-sm text-muted-foreground">Transacciones</p>
+                      </div>
+                      <div className="bg-muted p-4 rounded-lg text-center">
+                        <p className="text-2xl font-bold">{viewBusiness.rewardsRedeemed || 0}</p>
+                        <p className="text-sm text-muted-foreground">Premios canjeados</p>
+                      </div>
+                    </div>
+                  </TabsContent>
+                </Tabs>
+              </CardContent>
+            </Card>
+          </div>
+        )}
       </div>
     </div>
   )
+}
+
+function Label({ children }: { children: React.ReactNode }) {
+  return <p className="text-sm text-muted-foreground">{children}</p>
 }

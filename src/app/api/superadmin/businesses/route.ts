@@ -20,20 +20,44 @@ export async function GET(request: NextRequest) {
         slug: true,
         email: true,
         phone: true,
-        pointsPerPurchase: true,
+        pointsPerFrequency: true,
+        frequency: true,
         pointsForReward: true,
         rewardDescription: true,
+        rewardImageUrl: true,
+        cooldownHours: true,
+        maxDailyCheckIns: true,
         active: true,
         createdAt: true,
       },
     })
 
-    const activeCount = businesses.filter(b => b.active).length
+    // Get counts for each business
+    const businessesWithCounts = await Promise.all(
+      businesses.map(async (business) => {
+        const customersCount = await db.customer.count({
+          where: { businessId: business.id },
+        })
+        const transactionsCount = await db.transaction.count({
+          where: { businessId: business.id },
+        })
+        const rewardsRedeemed = await db.customerReward.count({
+          where: { reward: { businessId: business.id } },
+        })
+        return {
+          ...business,
+          customersCount,
+          transactionsCount,
+          rewardsRedeemed,
+        }
+      })
+    )
 
+    const activeCount = businesses.filter(b => b.active).length
     const totalCustomers = await db.customer.count()
 
     return NextResponse.json({
-      businesses,
+      businesses: businessesWithCounts,
       stats: {
         totalBusinesses: businesses.length,
         activeBusinesses: activeCount,

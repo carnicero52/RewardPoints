@@ -23,9 +23,15 @@ model Business {
   description String?
 
   // Reward Configuration
-  pointsPerPurchase Int      @default(1) // Puntos por cada compra
+  pointsPerFrequency  Int      @default(1) // Points to earn per X visits
+  frequency          Int      @default(1) // Visits required to earn points (e.g., 1 point every X visits)
   pointsForReward    Int      @default(10) // Puntos necesarios para premio
-  rewardDescription String?  // Descripción del premio
+  rewardDescription  String?  // Descripción del premio
+  rewardImageUrl     String?  // URL de imagen del premio
+  
+  // Anti-cheat Configuration
+  cooldownHours     Int      @default(24) // Horas entre check-ins (anti-trampa)
+  maxDailyCheckIns  Int      @default(1)  // Máx check-ins por día
 
   // Contact
   email    String?
@@ -99,6 +105,11 @@ model Customer {
 
   // For identification
   pin          String?  // PIN de 4-6 dígitos para check-in rápido
+  
+  // Anti-cheat tracking
+  lastCheckIn     DateTime?  // Último check-in
+  lastCheckInDate String?  // Fecha del último check-in (para daily limit)
+  checkInCountToday Int  @default(0) // Check-ins hoy
 
   active       Boolean  @default(true)
   createdAt    DateTime @default(now())

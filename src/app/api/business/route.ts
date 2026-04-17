@@ -37,10 +37,15 @@ export async function PUT(request: NextRequest) {
         description: body.description,
         email: body.email,
         phone: body.phone,
-        // Points
-        pointsPerPurchase: body.pointsPerPurchase,
+        // Points - Updated with new frequency-based system
+        pointsPerFrequency: body.pointsPerFrequency,
+        frequency: body.frequency,
         pointsForReward: body.pointsForReward,
         rewardDescription: body.rewardDescription,
+        rewardImageUrl: body.rewardImageUrl,
+        // Anti-cheat
+        cooldownHours: body.cooldownHours,
+        maxDailyCheckIns: body.maxDailyCheckIns,
         // SMTP
         smtpEnabled: body.smtpEnabled,
         smtpHost: body.smtpHost,

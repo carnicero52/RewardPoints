@@ -30,9 +30,14 @@ export function SettingsView() {
     brandColor: '#6366f1',
     description: '',
     // Points
-    pointsPerPurchase: 1,
+    pointsPerFrequency: 1,
+    frequency: 1,
     pointsForReward: 10,
     rewardDescription: '',
+    rewardImageUrl: '',
+    // Anti-cheat
+    cooldownHours: 24,
+    maxDailyCheckIns: 1,
     // Notifications
     email: '',
     phone: '',
@@ -58,9 +63,13 @@ export function SettingsView() {
           logo: data.logo || '',
           brandColor: data.brandColor || '#6366f1',
           description: data.description || '',
-          pointsPerPurchase: data.pointsPerPurchase || 1,
+          pointsPerFrequency: data.pointsPerFrequency || 1,
+          frequency: data.frequency || 1,
           pointsForReward: data.pointsForReward || 10,
           rewardDescription: data.rewardDescription || '',
+          rewardImageUrl: data.rewardImageUrl || '',
+          cooldownHours: data.cooldownHours || 24,
+          maxDailyCheckIns: data.maxDailyCheckIns || 1,
           email: data.email || '',
           phone: data.phone || '',
           smtpEnabled: data.smtpEnabled || false,
@@ -234,17 +243,31 @@ export function SettingsView() {
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label>Puntos por cada compra/visita</Label>
+                  <Label>Frecuencia de puntos (cada cuántas visitas)</Label>
                   <Input 
                     type="number"
-                    value={form.pointsPerPurchase}
-                    onChange={(e) => setForm({ ...form, pointsPerPurchase: parseInt(e.target.value) })}
+                    value={form.frequency}
+                    onChange={(e) => setForm({ ...form, frequency: parseInt(e.target.value) })}
                     min={1}
                   />
                   <p className="text-xs text-muted-foreground mt-1">
-                    Puntos que gana el cliente por cada visita
+                    Ej: 5 = 1 punto cada 5 visitas
                   </p>
                 </div>
+                <div>
+                  <Label>Puntos a ganar por frecuencia</Label>
+                  <Input 
+                    type="number"
+                    value={form.pointsPerFrequency}
+                    onChange={(e) => setForm({ ...form, pointsPerFrequency: parseInt(e.target.value) })}
+                    min={1}
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Puntos ganados cada X visitas
+                  </p>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label>Puntos necesarios para premio</Label>
                   <Input 
@@ -265,6 +288,56 @@ export function SettingsView() {
                   onChange={(e) => setForm({ ...form, rewardDescription: e.target.value })}
                   placeholder="Ej: Un café gratis, 20% de descuento, etc."
                 />
+              </div>
+              <div>
+                <Label>Imagen del premio (URL)</Label>
+                <Input 
+                  value={form.rewardImageUrl}
+                  onChange={(e) => setForm({ ...form, rewardImageUrl: e.target.value })}
+                  placeholder="https://ejemplo.com/imagen-premio.jpg"
+                />
+                {form.rewardImageUrl && (
+                  <div className="mt-2 rounded-lg overflow-hidden bg-gray-800 max-w-xs">
+                    <img src={form.rewardImageUrl} alt="Premio" className="w-full h-32 object-cover" />
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>🔒 Anti-trampas</CardTitle>
+              <CardDescription> Configura límites para evitar abusos</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label>Horas entre check-ins (cooldown)</Label>
+                  <Input 
+                    type="number"
+                    value={form.cooldownHours}
+                    onChange={(e) => setForm({ ...form, cooldownHours: parseInt(e.target.value) })}
+                    min={0}
+                    max={168}
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    0 = sin límite, 24 = 1 check-in cada 24 horas
+                  </p>
+                </div>
+                <div>
+                  <Label>Check-ins máximos por día</Label>
+                  <Input 
+                    type="number"
+                    value={form.maxDailyCheckIns}
+                    onChange={(e) => setForm({ ...form, maxDailyCheckIns: parseInt(e.target.value) })}
+                    min={1}
+                    max={10}
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Límite de check-ins en el mismo día
+                  </p>
+                </div>
               </div>
             </CardContent>
           </Card>

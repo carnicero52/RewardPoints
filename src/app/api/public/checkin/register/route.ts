@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
     // Get business config
     const business = await db.business.findUnique({
       where: { id: qr.businessId },
-      select: { pointsPerPurchase: true, pointsForReward: true, rewardDescription: true },
+      select: { pointsPerFrequency: true, frequency: true, pointsForReward: true, rewardDescription: true, rewardImageUrl: true },
     })
 
     return NextResponse.json({
