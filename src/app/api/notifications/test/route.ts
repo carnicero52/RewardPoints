@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { sendTelegramMessage } from '@/lib/telegram-notify'
+import { sendEmailNotification, createGmailTransporter } from '@/lib/email-notify'
 
 export async function POST(request: NextRequest) {
   try {
@@ -39,6 +40,34 @@ export async function POST(request: NextRequest) {
         text: testMessage,
         apiKey: business.telegramBotToken || undefined
       })
+
+      if (result.success) {
+        return NextResponse.json({ success: true, messageId: result.messageId })
+      } else {
+        return NextResponse.json({ success: false, error: result.error })
+      }
+    }
+
+    if (channel === 'email') {
+      if (!business.smtpEnabled || !business.smtpUser || !business.smtpPassword) {
+        return NextResponse.json({ success: false, error: 'SMTP no configurado' })
+      }
+
+      const result = await sendEmailNotification(
+        {
+          smtpHost: business.smtpHost,
+          smtpPort: business.smtpPort,
+          smtpUser: business.smtpUser,
+          smtpPassword: business.smtpPassword,
+          smtpFrom: business.smtpFrom,
+        },
+        {
+          to: business.smtpUser,
+          subject: '🔔 Prueba de RewardPoints',
+          text: `Hola ${business.name}, las notificaciones de email están funcionando!`,
+          html: `<p>Hola ${business.name}, las notificaciones de email están funcionando! ✅</p>`,
+        }
+      )
 
       if (result.success) {
         return NextResponse.json({ success: true, messageId: result.messageId })

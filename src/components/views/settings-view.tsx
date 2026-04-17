@@ -432,6 +432,26 @@ export function SettingsView() {
                   </div>
                 </div>
               )}
+              {form.emailEnabled && form.smtpUser && form.smtpPassword && (
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={async () => {
+                    try {
+                      const res = await fetch('/api/notifications/test', {
+                        method: 'POST',
+                        headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ channel: 'email' })
+                      })
+                      const data = await res.json()
+                      if (res.ok && data.success) toast.success('✅ Email de prueba enviado')
+                      else toast.error(data.error || 'Error al enviar')
+                    } catch (e) { toast.error('Error de conexión') }
+                  }}
+                >
+                  Probar Conexión Email
+                </Button>
+              )}
             </CardContent>
           </Card>
 
