@@ -13,6 +13,8 @@ export async function POST(request: NextRequest) {
     // Get business by QR code: first try QRCode table by id or code, then by slug
     let businessId: string | null = null
 
+    let qrBiz: { name?: string; logo?: string | null; brandColor?: string | null } | null = null
+
     const qr = await db.qRCode.findFirst({
       where: {
         OR: [
@@ -20,18 +22,23 @@ export async function POST(request: NextRequest) {
           { code: qrCode, active: true, expiresAt: { gt: new Date() } },
         ],
       },
+      include: {
+        business: { select: { id: true, name: true, logo: true, brandColor: true } },
+      },
     })
 
     if (qr) {
       businessId = qr.businessId
+      qrBiz = qr.business
     } else {
       // Fallback: find business directly by slug
       const bizBySlug = await db.business.findUnique({
         where: { slug: qrCode, active: true },
-        select: { id: true },
+        select: { id: true, name: true, logo: true, brandColor: true },
       })
       if (bizBySlug) {
         businessId = bizBySlug.id
+        qrBiz = bizBySlug
       }
     }
 
@@ -81,6 +88,11 @@ export async function POST(request: NextRequest) {
         name: customer.name,
         totalPoints: customer.totalPoints,
         pin: generatedPin,
+      },
+      business: {
+        name: qrBiz?.name || null,
+        logo: qrBiz?.logo || null,
+        brandColor: qrBiz?.brandColor || null,
       },
       message: 'Cliente registrado exitosamente',
     })

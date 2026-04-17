@@ -64,9 +64,9 @@ export function PublicCheckInView() {
         throw new Error(data.error || 'QR inválido')
       }
 
-      setBusinessName(data.business.name)
-      setBusinessLogo(data.business.logo || '')
-      setBrandColor(data.business.brandColor || '#6366f1')
+      setBusinessName(data.business?.name || '')
+      setBusinessLogo(data.business?.logo || '')
+      setBrandColor(data.business?.brandColor || '#6366f1')
       setStep('identify')
     } catch (error: any) {
       toast.error(error.message)
@@ -97,11 +97,11 @@ export function PublicCheckInView() {
       const data = await res.json()
 
       if (!res.ok) {
-        if (data.needsRegistration) {
-          setBusinessName(data.business.name)
-          setBusinessLogo(data.business.logo || '')
-          setBrandColor(data.business.brandColor || '#6366f1')
-          setProgress(data.progress)
+        if (data.needsRegistration && data.business) {
+          setBusinessName(data.business?.name || '')
+          setBusinessLogo(data.business?.logo || '')
+          setBrandColor(data.business?.brandColor || '#6366f1')
+          setProgress(data.progress || null)
           setStep('identify')
           // Trigger registration flow
           toast.info('Regístrate para comenzar a acumular puntos')
@@ -110,11 +110,14 @@ export function PublicCheckInView() {
         throw new Error(data.error || 'Cliente no encontrado')
       }
 
-      setCustomerName(data.customer.name)
-      setCustomerId(data.customer.id)
-      setCurrentPoints(data.customer.totalPoints)
-      setTotalVisits(data.customer.totalVisits)
-      setProgress(data.progress)
+      // Safe access to customer data
+      if (data.customer) {
+        setCustomerName(data.customer.name)
+        setCustomerId(data.customer.id)
+        setCurrentPoints(data.customer.totalPoints ?? 0)
+        setTotalVisits(data.customer.totalVisits ?? 0)
+      }
+      setProgress(data.progress || null)
       setStep('success')
     } catch (error: any) {
       toast.error(error.message)
@@ -156,10 +159,10 @@ export function PublicCheckInView() {
         throw new Error(data.error || 'Error al registrar check-in')
       }
 
-      if (data.checkIn) {
-        setCurrentPoints(data.customer.totalPoints)
-        setTotalVisits(data.customer.totalVisits)
-        setProgress(data.progress)
+      if (data.checkIn && data.customer) {
+        setCurrentPoints(data.customer.totalPoints ?? 0)
+        setTotalVisits(data.customer.totalVisits ?? 0)
+        setProgress(data.progress || null)
         
         if (data.checkIn.pointsEarned && data.checkIn.pointsEarned > 0) {
           toast.success(`🎉 ¡Ganaste ${data.checkIn.pointsEarned} punto(s)!`)
@@ -204,6 +207,12 @@ export function PublicCheckInView() {
       setCustomerId(data.customer.id)
       setCurrentPoints(data.customer.totalPoints)
       setTotalVisits(0)
+      // Update business info from registration response
+      if (data.business) {
+        setBusinessName(data.business?.name || businessName)
+        setBusinessLogo(data.business?.logo || '')
+        setBrandColor(data.business?.brandColor || brandColor)
+      }
       setStep('success')
       toast.success(`¡Registro exitoso, ${data.customer.name}!`)
     } catch (error: any) {
