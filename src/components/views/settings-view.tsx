@@ -55,6 +55,9 @@ export function SettingsView() {
     telegramEnabled: false,
     telegramBotToken: '',
     telegramChatId: '',
+    // Callmebot
+    callmebotApiKey: '',
+    callmebotPhone: '',
     // Notification preferences
     notifyOnCheckin: true,
     notifyOnReward: true,
@@ -94,6 +97,8 @@ export function SettingsView() {
           telegramEnabled: data.telegramEnabled || false,
           telegramBotToken: data.telegramBotToken || '',
           telegramChatId: data.telegramChatId || '',
+          callmebotApiKey: data.callmebotApiKey || '',
+          callmebotPhone: data.callmebotPhone || '',
           notifyOnCheckin: data.notifyOnCheckin ?? true,
           notifyOnReward: data.notifyOnReward ?? true,
           notifyOnInactive: data.notifyOnInactive ?? false,
@@ -520,16 +525,32 @@ export function SettingsView() {
               <CardDescription> Notificaciones via Callmebot API</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <p className="text-sm text-muted-foreground">Usa tu API key de Callmebot configurada en el servidor.</p>
+              <div>
+                <Label>API Key</Label>
+                <Input 
+                  value={form.callmebotApiKey}
+                  onChange={(e) => setForm({ ...form, callmebotApiKey: e.target.value })}
+                  placeholder="Tu API key de Callmebot"
+                />
+              </div>
+              <div>
+                <Label>Número de Teléfono</Label>
+                <Input 
+                  value={form.callmebotPhone}
+                  onChange={(e) => setForm({ ...form, callmebotPhone: e.target.value })}
+                  placeholder="+584121234567"
+                />
+              </div>
               <Button 
                 variant="outline" 
                 size="sm"
+                disabled={!form.callmebotApiKey || !form.callmebotPhone}
                 onClick={async () => {
                   try {
                     const res = await fetch('/api/notifications/test', {
                       method: 'POST',
                       headers: { ...authHeaders(), 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ channel: 'callmebot' })
+                      body: JSON.stringify({ channel: 'callmebot', phone: form.callmebotPhone })
                     })
                     const data = await res.json()
                     if (res.ok && data.success) toast.success('✅ Mensaje de prueba enviado por Callmebot')
@@ -549,16 +570,24 @@ export function SettingsView() {
               <CardDescription> Notificaciones via WhatsApp API</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <p className="text-sm text-muted-foreground">Envía notificaciones por WhatsApp via Callmebot.</p>
+              <div>
+                <Label>Número WhatsApp</Label>
+                <Input 
+                  value={form.callmebotPhone}
+                  onChange={(e) => setForm({ ...form, callmebotPhone: e.target.value })}
+                  placeholder="+584121234567"
+                />
+              </div>
               <Button 
                 variant="outline" 
                 size="sm"
+                disabled={!form.callmebotPhone}
                 onClick={async () => {
                   try {
                     const res = await fetch('/api/notifications/test', {
                       method: 'POST',
                       headers: { ...authHeaders(), 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ channel: 'whatsapp' })
+                      body: JSON.stringify({ channel: 'whatsapp', phone: form.callmebotPhone })
                     })
                     const data = await res.json()
                     if (res.ok && data.success) toast.success('✅ Mensaje de prueba enviado por WhatsApp')
