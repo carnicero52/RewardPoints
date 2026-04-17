@@ -48,9 +48,21 @@ model Business {
   smtpFrom     String?
   smtpEnabled  Boolean  @default(false)
 
+  // Email notifications
+  emailEnabled Boolean @default(false)
+  emailFrom    String?
+
+  // Telegram (Callmebot)
   telegramBotToken    String?
   telegramChatId      String?
   telegramEnabled     Boolean  @default(false)
+
+  // Notification preferences
+  notifyOnCheckin       Boolean @default(true)
+  notifyOnReward        Boolean @default(true)
+  notifyOnInactive      Boolean @default(false)
+  customCheckinMessage  String?
+  customRewardMessage   String?
 
   // Configuration
   active      Boolean  @default(true)

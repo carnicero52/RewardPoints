@@ -38,18 +38,29 @@ export function SettingsView() {
     // Anti-cheat
     cooldownHours: 24,
     maxDailyCheckIns: 1,
-    // Notifications
+    // Contact
     email: '',
     phone: '',
+    // SMTP
     smtpEnabled: false,
     smtpHost: '',
     smtpPort: 465,
     smtpUser: '',
     smtpPassword: '',
     smtpFrom: '',
+    // Email notifications
+    emailEnabled: false,
+    emailFrom: '',
+    // Telegram
     telegramEnabled: false,
     telegramBotToken: '',
     telegramChatId: '',
+    // Notification preferences
+    notifyOnCheckin: true,
+    notifyOnReward: true,
+    notifyOnInactive: false,
+    customCheckinMessage: '',
+    customRewardMessage: '',
   })
 
   useEffect(() => {
@@ -78,9 +89,16 @@ export function SettingsView() {
           smtpUser: data.smtpUser || '',
           smtpPassword: data.smtpPassword || '',
           smtpFrom: data.smtpFrom || '',
+          emailEnabled: data.emailEnabled || false,
+          emailFrom: data.emailFrom || '',
           telegramEnabled: data.telegramEnabled || false,
           telegramBotToken: data.telegramBotToken || '',
           telegramChatId: data.telegramChatId || '',
+          notifyOnCheckin: data.notifyOnCheckin ?? true,
+          notifyOnReward: data.notifyOnReward ?? true,
+          notifyOnInactive: data.notifyOnInactive ?? false,
+          customCheckinMessage: data.customCheckinMessage || '',
+          customRewardMessage: data.customRewardMessage || '',
         })
       })
       .catch(err => toast.error('Error loading settings'))
@@ -354,13 +372,24 @@ export function SettingsView() {
               <div className="flex items-center gap-2">
                 <input 
                   type="checkbox"
-                  id="smtpEnabled"
-                  checked={form.smtpEnabled}
-                  onChange={(e) => setForm({ ...form, smtpEnabled: e.target.checked })}
+                  id="emailEnabled"
+                  checked={form.emailEnabled}
+                  onChange={(e) => setForm({ ...form, emailEnabled: e.target.checked })}
                 />
-                <Label htmlFor="smtpEnabled">Habilitar emails</Label>
+                <Label htmlFor="emailEnabled">Habilitar notificaciones por email</Label>
               </div>
-              {form.smtpEnabled && (
+              {form.emailEnabled && (
+                <>
+                  <div className="flex items-center gap-2">
+                    <input 
+                      type="checkbox"
+                      id="smtpEnabled"
+                      checked={form.smtpEnabled}
+                      onChange={(e) => setForm({ ...form, smtpEnabled: e.target.checked })}
+                    />
+                    <Label htmlFor="smtpEnabled">Usar SMTP personalizado</Label>
+                  </div>
+                  {form.smtpEnabled && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label>Servidor SMTP</Label>
@@ -441,6 +470,65 @@ export function SettingsView() {
                   </div>
                 </div>
               )}
+            </CardContent>
+          </Card>
+
+          {/* Notification Preferences */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Preferencias de Notificaciones</CardTitle>
+              <CardDescription> Selecciona qué eventos generan notificaciones</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center gap-2">
+                <input 
+                  type="checkbox"
+                  id="notifyOnCheckin"
+                  checked={form.notifyOnCheckin}
+                  onChange={(e) => setForm({ ...form, notifyOnCheckin: e.target.checked })}
+                />
+                <Label htmlFor="notifyOnCheckin">Notificar cuando un cliente hace check-in</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <input 
+                  type="checkbox"
+                  id="notifyOnReward"
+                  checked={form.notifyOnReward}
+                  onChange={(e) => setForm({ ...form, notifyOnReward: e.target.checked })}
+                />
+                <Label htmlFor="notifyOnReward">Notificar cuando un cliente canjea un premio</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <input 
+                  type="checkbox"
+                  id="notifyOnInactive"
+                  checked={form.notifyOnInactive}
+                  onChange={(e) => setForm({ ...form, notifyOnInactive: e.target.checked })}
+                />
+                <Label htmlFor="notifyOnInactive">Notificar cuando un cliente está inactivo</Label>
+              </div>
+              <div className="border-t pt-4 mt-4">
+                <Label className="mb-2 block">Mensaje personalizado de check-in</Label>
+                <Input 
+                  value={form.customCheckinMessage}
+                  onChange={(e) => setForm({ ...form, customCheckinMessage: e.target.value })}
+                  placeholder="¡Nuevo cliente! {name} acumuló {points} puntos"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Variables: {'{name}'}, {'{points}'}, {'{totalPoints}'}, {'{visits}'}
+                </p>
+              </div>
+              <div>
+                <Label className="mb-2 block">Mensaje personalizado de recompensa</Label>
+                <Input 
+                  value={form.customRewardMessage}
+                  onChange={(e) => setForm({ ...form, customRewardMessage: e.target.value })}
+                  placeholder="¡{name} canjeó un premio!"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Variables: {'{name}'}, {'{reward}'}
+                </p>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
