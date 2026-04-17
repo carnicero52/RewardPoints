@@ -3,7 +3,7 @@
 /* Dark mode - SIGA-RH inspired palette with better color contrast */
 :root, .dark {
   --background: #0f172a;
-  --foreground: #e2e8f0;
+  --foreground: #ccfbf1;
   --card: #1e293b;
   --card-foreground: #e2e8f0;
   --popover: #1e293b;
@@ -23,8 +23,8 @@
   --ring: #0d9488;
   --sidebar-bg: #020617;
   --text-primary: #f1f5f9;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
+  --text-secondary: #5eead4;  /* Teal light - friendly and professional */
+  --text-muted: #2dd4bf;     /* Teal medium */
 }
 
 @theme inline {
