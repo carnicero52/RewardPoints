@@ -100,3 +100,17 @@ body {
 .border-white\/10 { border-color: var(--border) !important; }
 
 .bg-gradient-to-b { background: var(--sidebar-bg) !important; }
+
+/* Override more hardcoded white backgrounds */
+.bg-gray-100, .bg-gray-200, .bg-slate-50, .bg-slate-100 { background: var(--background) !important; }
+.bg-white, .bg-white\/100 { background: var(--card) !important; }
+.from-gray-100, .from-gray-200 { background: var(--background) !important; }
+.bg-purple-500\/10, .bg-purple-500\/20 { background: var(--card) !important; }
+.bg-purple-900\/50, .bg-purple-900\/30 { background: var(--secondary) !important; }
+.bg-indigo-900\/50 { background: var(--secondary) !important; }
+.bg-gradient-to-br { background: var(--background) !important; }
+.from-purple-900, .from-indigo-900 { background: var(--background) !important; }
+.via-indigo-900, .to-violet-800 { background: var(--secondary) !important; }
+
+/* Ensure proper text contrast */
+.text-purple-200, .text-purple-300, .text-purple-400 { color: var(--text-secondary) !important; }
