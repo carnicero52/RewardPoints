@@ -522,27 +522,27 @@ export function SettingsView() {
           <Card>
             <CardHeader>
               <CardTitle>Callmebot (Telegram)</CardTitle>
-              <CardDescription> Notificaciones via Callmebot API</CardDescription>
+              <CardDescription>Notificaciones via Callmebot</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
                 <Label>API Key</Label>
-                <Input 
+                <Input
                   value={form.callmebotApiKey}
                   onChange={(e) => setForm({ ...form, callmebotApiKey: e.target.value })}
-                  placeholder="Tu API key de Callmebot"
+                  placeholder="Tu API key"
                 />
               </div>
               <div>
-                <Label>Número de Teléfono</Label>
-                <Input 
+                <Label>Teléfono</Label>
+                <Input
                   value={form.callmebotPhone}
                   onChange={(e) => setForm({ ...form, callmebotPhone: e.target.value })}
                   placeholder="+584121234567"
                 />
               </div>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 size="sm"
                 disabled={!form.callmebotApiKey || !form.callmebotPhone}
                 onClick={async () => {
@@ -553,84 +553,13 @@ export function SettingsView() {
                       body: JSON.stringify({ channel: 'callmebot', phone: form.callmebotPhone })
                     })
                     const data = await res.json()
-                    if (res.ok && data.success) toast.success('✅ Mensaje de prueba enviado por Callmebot')
-                    else toast.error(data.error || 'Error al enviar')
-                  } catch (e) { toast.error('Error de conexión') }
+                    if (res.ok && data.success) toast.success('✅ Prueba enviada')
+                    else toast.error(data.error || 'Error')
+                  } catch (e) { toast.error('Error') }
                 }}
               >
                 Probar Callmebot
               </Button>
-            </CardContent>
-          </Card>
-
-          {/* Callmebot (WhatsApp) */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Callmebot (WhatsApp)</CardTitle>
-              <CardDescription> Notificaciones via WhatsApp API</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label>Número WhatsApp</Label>
-                <Input 
-                  value={form.callmebotPhone}
-                  onChange={(e) => setForm({ ...form, callmebotPhone: e.target.value })}
-                  placeholder="+584121234567"
-                />
-              </div>
-              <Button 
-                variant="outline" 
-                size="sm"
-                disabled={!form.callmebotPhone}
-                onClick={async () => {
-                  try {
-                    const res = await fetch('/api/notifications/test', {
-                      method: 'POST',
-                      headers: { ...authHeaders(), 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ channel: 'whatsapp', phone: form.callmebotPhone })
-                    })
-                    const data = await res.json()
-                    if (res.ok && data.success) toast.success('✅ Mensaje de prueba enviado por WhatsApp')
-                    else toast.error(data.error || 'Error al enviar')
-                  } catch (e) { toast.error('Error de conexión') }
-                }}
-              >
-                Probar WhatsApp
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Danger Zone */}
-          <Card className="border-red-500/50">
-            <CardHeader>
-              <CardTitle className="text-red-400">Zona de Peligro</CardTitle>
-              <CardDescription> Acciones irreversibles</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">Borrar historial de transacciones</p>
-                  <p className="text-sm text-muted-foreground">Eliminar todas las transacciones (no clientes)</p>
-                </div>
-                <Button 
-                  variant="destructive" 
-                  size="sm"
-                  onClick={async () => {
-                    if (!confirm('¿Borrar todo el historial de transacciones? Esta acción no se puede deshacer.')) return
-                    try {
-                      const res = await fetch('/api/transactions/clear', {
-                        method: 'DELETE',
-                        headers: authHeaders()
-                      })
-                      const data = await res.json()
-                      if (res.ok && data.success) toast.success('✅ Historial borrado')
-                      else toast.error(data.error || 'Error al borrar')
-                    } catch (e) { toast.error('Error de conexión') }
-                  }}
-                >
-                  Borrar Historial
-                </Button>
-              </div>
             </CardContent>
           </Card>
 
