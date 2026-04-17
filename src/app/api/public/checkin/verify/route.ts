@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
         expiresAt: { gt: new Date() },
       },
       include: {
-        business: { select: { id: true, name: true, brandColor: true } },
+        business: { select: { id: true, name: true, logo: true, brandColor: true, rewardDescription: true, rewardImageUrl: true, pointsForReward: true, pointsPerFrequency: true, frequency: true, cooldownHours: true } },
       },
     })
 
@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
     if (!qrCode) {
       const business = await db.business.findUnique({
         where: { slug: code, active: true },
-        select: { id: true, name: true, brandColor: true },
+        select: { id: true, name: true, logo: true, brandColor: true, rewardDescription: true, rewardImageUrl: true, pointsForReward: true, pointsPerFrequency: true, frequency: true, cooldownHours: true },
       })
 
       if (business) {

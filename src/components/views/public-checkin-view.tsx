@@ -43,6 +43,28 @@ export function PublicCheckInView() {
   const [isCheckingIn, setIsCheckingIn] = useState(false)
   const [loading, setLoading] = useState(false)
   const [cooldownInfo, setCooldownInfo] = useState<{ hours: number; remaining: number } | null>(null)
+  const [countdownText, setCountdownText] = useState('')
+
+  // Countdown timer effect
+  useEffect(() => {
+    if (!cooldownInfo || cooldownInfo.remaining <= 0) {
+      setCountdownText('')
+      return
+    }
+
+    const updateCountdown = () => {
+      const hours = cooldownInfo.remaining
+      if (hours >= 1) {
+        setCountdownText(`${hours}h`)
+      } else {
+        setCountdownText('< 1h')
+      }
+    }
+
+    updateCountdown()
+    const interval = setInterval(updateCountdown, 60000)
+    return () => clearInterval(interval)
+  }, [cooldownInfo])
 
   // Check for QR in URL
   useEffect(() => {
@@ -347,7 +369,7 @@ export function PublicCheckInView() {
           </Card>
         )}
 
-        {step === 'success' && progress && (
+        {step === 'success' && (
           <div className="space-y-4">
             {/* Welcome Card */}
             <Card className="border-purple-500/50 bg-purple-500/10">
@@ -370,19 +392,19 @@ export function PublicCheckInView() {
                   </div>
                 </div>
 
-                {/* Check-in Button */}
+                {/* Check-in Button with Countdown */}
                 <Button 
                   onClick={handleCheckIn}
                   disabled={isCheckingIn || !!cooldownInfo}
                   className="w-full text-lg py-6"
-                  style={{ backgroundColor: brandColor }}
+                  style={{ backgroundColor: cooldownInfo ? '#6b7280' : brandColor }}
                 >
                   {isCheckingIn ? (
                     'Registrando...'
                   ) : cooldownInfo ? (
-                    <span className="flex items-center gap-2">
-                      <Clock className="h-5 w-5" />
-                      Espera {cooldownInfo.remaining}h
+                    <span className="flex items-center justify-center gap-2">
+                      <Clock className="h-5 w-5 animate-pulse" />
+                      Espera {countdownText || `${cooldownInfo.remaining}h`}
                     </span>
                   ) : (
                     <span className="flex items-center gap-2">
@@ -392,15 +414,17 @@ export function PublicCheckInView() {
                   )}
                 </Button>
 
-                {cooldownInfo && (
-                  <p className="text-sm text-amber-400">
-                    ⚠️ Debes esperar {cooldownInfo.remaining} hora(s) para otro check-in
-                  </p>
+                {cooldownInfo && cooldownInfo.remaining > 0 && (
+                  <div className="bg-amber-500/20 border border-amber-500/50 rounded-lg p-3 text-center">
+                    <p className="text-amber-400 text-sm font-semibold">
+                      ⏱️ Cooldown: Espera {cooldownInfo.remaining} hora(s) para nuevo check-in
+                    </p>
+                  </div>
                 )}
               </CardContent>
             </Card>
 
-            {/* Progress Card */}
+            {/* Progress / Reward Card - Always shows */}
             <Card className="bg-gray-900/80 border-gray-700">
               <CardHeader className="pb-2">
                 <CardTitle className="flex items-center gap-2 text-white text-lg">
@@ -410,7 +434,7 @@ export function PublicCheckInView() {
               </CardHeader>
               <CardContent className="space-y-4">
                 {/* Reward Image */}
-                {progress.rewardImage && (
+                {progress?.rewardImage ? (
                   <div className="rounded-lg overflow-hidden bg-gray-800">
                     <img 
                       src={progress.rewardImage} 
@@ -418,15 +442,20 @@ export function PublicCheckInView() {
                       className="w-full h-40 object-cover"
                     />
                   </div>
+                ) : (
+                  <div className="rounded-lg bg-gray-800 p-8 text-center">
+                    <Gift className="h-12 w-12 mx-auto text-gray-600 mb-2" />
+                    <p className="text-gray-500">Premio por configurar</p>
+                  </div>
                 )}
 
                 {/* Reward Info */}
                 <div className="text-center">
                   <p className="text-lg font-semibold text-white">
-                    {progress.reward || 'Premio Especial'}
+                    {progress?.reward || 'Premio Especial'}
                   </p>
                   <p className="text-sm text-gray-400">
-                    {progress.visitsUntilReward} visita(s) más para canjear
+                    {progress?.visitsUntilReward || progress?.needed || 0} visita(s) más para canjear
                   </p>
                 </div>
 
@@ -435,14 +464,14 @@ export function PublicCheckInView() {
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-400">Progreso</span>
                     <span className="text-white">
-                      {progress.needed - progress.visitsUntilReward} / {progress.needed} visitas
+                      {(progress?.needed || 0) - (progress?.visitsUntilReward || 0)} / {progress?.needed || 0} visitas
                     </span>
                   </div>
                   <Progress value={progressPercent} className="h-3" />
                 </div>
 
                 {/* Frequency Info */}
-                {progress.frequency && progress.frequency > 1 && (
+                {progress?.frequency && progress.frequency > 1 && (
                   <div className="flex items-center justify-center gap-2 text-sm text-gray-400 bg-gray-800/50 rounded-lg p-2">
                     <Star className="h-4 w-4 text-yellow-500" />
                     <span>Ganas 1 punto cada {progress.frequency} visitas</span>

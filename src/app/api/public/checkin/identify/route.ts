@@ -73,8 +73,8 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    // Calculate progress toward reward
-    const progressNeeded = business.frequency || 1
+    // Calculate progress toward reward (default to 10 if not configured)
+    const progressNeeded = business.pointsForReward || 10
 
     // If check-in requested, validate and record
     let checkInResult: { success: boolean; message: string; pointsEarned?: number } | null = null
@@ -144,6 +144,7 @@ export async function POST(request: NextRequest) {
 
     // If customer not found, return info to register
     if (!customer) {
+      const needed = business.pointsForReward || 10
       return NextResponse.json({
         needsRegistration: true,
         business: {
@@ -157,32 +158,45 @@ export async function POST(request: NextRequest) {
         },
         progress: {
           current: 0,
-          needed: business.pointsForReward,
-          visitsUntilReward: business.pointsForReward,
-          reward: business.rewardDescription,
+          needed: needed,
+          visitsUntilReward: needed,
+          reward: business.rewardDescription || 'Premio Especial',
           rewardImage: business.rewardImageUrl,
+          pointsPerFrequency: business.pointsPerFrequency,
+          frequency: business.frequency,
         },
       })
     }
+
+    // Get updated customer after potential check-in
+    const updatedCustomer = await db.customer.findUnique({
+      where: { id: customer.id },
+    })
+
+    const needed = business.pointsForReward || 10
+    const currentVisits = updatedCustomer?.totalVisits || customer.totalVisits
+    const visitsUntilReward = Math.max(0, needed - currentVisits)
 
     return NextResponse.json({
       customer: {
         id: customer.id,
         name: customer.name,
-        totalPoints: customer.totalPoints,
-        totalVisits: customer.totalVisits,
+        totalPoints: updatedCustomer?.totalPoints ?? customer.totalPoints,
+        totalVisits: currentVisits,
       },
       business: {
         name: business.name,
         logo: business.logo,
         brandColor: business.brandColor,
+        rewardDescription: business.rewardDescription,
+        rewardImageUrl: business.rewardImageUrl,
       },
       checkIn: checkInResult,
       progress: {
-        current: customer.totalPoints,
-        needed: business.pointsForReward,
-        visitsUntilReward: Math.max(0, business.pointsForReward - customer.totalVisits),
-        reward: business.rewardDescription,
+        current: updatedCustomer?.totalPoints ?? customer.totalPoints,
+        needed,
+        visitsUntilReward,
+        reward: business.rewardDescription || 'Premio Especial',
         rewardImage: business.rewardImageUrl,
         pointsPerFrequency: business.pointsPerFrequency,
         frequency: business.frequency,
@@ -190,8 +204,8 @@ export async function POST(request: NextRequest) {
       antiCheat: {
         cooldownHours: business.cooldownHours,
         maxDailyCheckIns: business.maxDailyCheckIns,
-        lastCheckIn: customer.lastCheckIn,
-        todayCheckIns: customer.lastCheckInDate === new Date().toISOString().split('T')[0] ? customer.checkInCountToday : 0,
+        lastCheckIn: updatedCustomer?.lastCheckIn ?? customer.lastCheckIn,
+        todayCheckIns: updatedCustomer?.lastCheckInDate === new Date().toISOString().split('T')[0] ? updatedCustomer?.checkInCountToday : 0,
       },
     })
   } catch (error: any) {
