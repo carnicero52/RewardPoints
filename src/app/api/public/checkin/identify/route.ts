@@ -10,22 +10,38 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'QR code and identification required' }, { status: 400 })
     }
 
-    // Get QR code to find business
+    // Get business by QR code: first try QRCode table by id or code, then by slug
+    let businessId: string | null = null
+
     const qr = await db.qRCode.findFirst({
       where: {
-        id: qrCode,
-        active: true,
-        expiresAt: { gt: new Date() },
+        OR: [
+          { id: qrCode, active: true, expiresAt: { gt: new Date() } },
+          { code: qrCode, active: true, expiresAt: { gt: new Date() } },
+        ],
       },
     })
 
-    if (!qr) {
+    if (qr) {
+      businessId = qr.businessId
+    } else {
+      // Fallback: find business directly by slug
+      const bizBySlug = await db.business.findUnique({
+        where: { slug: qrCode, active: true },
+        select: { id: true },
+      })
+      if (bizBySlug) {
+        businessId = bizBySlug.id
+      }
+    }
+
+    if (!businessId) {
       return NextResponse.json({ error: 'QR code invalid or expired' }, { status: 400 })
     }
 
     // Get business config
     const business = await db.business.findUnique({
-      where: { id: qr.businessId },
+      where: { id: businessId },
       select: {
         name: true,
         logo: true,
@@ -52,14 +68,13 @@ export async function POST(request: NextRequest) {
 
     const customer = await db.customer.findFirst({
       where: {
-        businessId: qr.businessId,
+        businessId,
         OR: searchConditions,
       },
     })
 
     // Calculate progress toward reward
     const progressNeeded = business.frequency || 1
-    const visitsUntilReward = Math.max(0, business.pointsForReward - customer.totalVisits)
 
     // If check-in requested, validate and record
     let checkInResult: { success: boolean; message: string; pointsEarned?: number } | null = null
@@ -96,7 +111,7 @@ export async function POST(request: NextRequest) {
       const pointsEarned = (newVisitCount % progressNeeded === 0) ? (business.pointsPerFrequency || 1) : 0
 
       // Update customer
-      const updatedCustomer = await db.customer.update({
+      await db.customer.update({
         where: { id: customer.id },
         data: {
           totalVisits: { increment: 1 },
@@ -111,7 +126,7 @@ export async function POST(request: NextRequest) {
       await db.transaction.create({
         data: {
           customerId: customer.id,
-          businessId: qr.businessId,
+          businessId,
           points: pointsEarned,
           notes: 'Check-in automático',
           status: 'completed',

@@ -10,16 +10,32 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'QR code and name required' }, { status: 400 })
     }
 
-    // Get QR code to find business
+    // Get business by QR code: first try QRCode table by id or code, then by slug
+    let businessId: string | null = null
+
     const qr = await db.qRCode.findFirst({
       where: {
-        id: qrCode,
-        active: true,
-        expiresAt: { gt: new Date() },
+        OR: [
+          { id: qrCode, active: true, expiresAt: { gt: new Date() } },
+          { code: qrCode, active: true, expiresAt: { gt: new Date() } },
+        ],
       },
     })
 
-    if (!qr) {
+    if (qr) {
+      businessId = qr.businessId
+    } else {
+      // Fallback: find business directly by slug
+      const bizBySlug = await db.business.findUnique({
+        where: { slug: qrCode, active: true },
+        select: { id: true },
+      })
+      if (bizBySlug) {
+        businessId = bizBySlug.id
+      }
+    }
+
+    if (!businessId) {
       return NextResponse.json({ error: 'QR code invalid or expired' }, { status: 400 })
     }
 
@@ -31,7 +47,7 @@ export async function POST(request: NextRequest) {
     if (existingConditions.length > 0) {
       const existing = await db.customer.findFirst({
         where: {
-          businessId: qr.businessId,
+          businessId,
           OR: existingConditions,
         },
       })
@@ -49,7 +65,7 @@ export async function POST(request: NextRequest) {
     // Create customer
     const customer = await db.customer.create({
       data: {
-        businessId: qr.businessId,
+        businessId,
         name: name.trim(),
         phone: phone?.trim() || null,
         email: email?.trim().toLowerCase() || null,
@@ -57,12 +73,6 @@ export async function POST(request: NextRequest) {
         totalPoints: 0,
         totalVisits: 0,
       },
-    })
-
-    // Get business config
-    const business = await db.business.findUnique({
-      where: { id: qr.businessId },
-      select: { pointsPerFrequency: true, frequency: true, pointsForReward: true, rewardDescription: true, rewardImageUrl: true },
     })
 
     return NextResponse.json({

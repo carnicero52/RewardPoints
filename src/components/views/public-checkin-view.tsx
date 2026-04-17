@@ -374,7 +374,7 @@ export function PublicCheckInView() {
                   ) : (
                     <span className="flex items-center gap-2">
                       <Zap className="h-5 w-5" />
-                      Registrar Visitay Ganar Puntos
+                      Registrar Visita y Ganar Puntos
                     </span>
                   )}
                 </Button>

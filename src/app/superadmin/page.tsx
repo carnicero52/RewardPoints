@@ -75,7 +75,7 @@ export default function SuperAdminPage() {
 
   const toggleBusiness = async (businessId: string, currentActive: boolean) => {
     try {
-      const res = await fetch(`/api/superadmin/businesses/${businessId}`, {
+      const res = await fetch(`/api/superadmin/businesses/${businessId}?secret=${encodeURIComponent(secret)}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ active: !currentActive }),
