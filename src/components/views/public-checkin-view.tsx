@@ -332,6 +332,8 @@ export function PublicCheckInView() {
 
               <div className="text-center text-sm text-muted-foreground">
                 ¿No tienes cuenta?{' '}
+              {/* Registration disabled - only admin creates customers */}
+              {false && (
                 <button 
                   onClick={handleRegister}
                   className="underline hover:text-purple-600"
@@ -339,6 +341,7 @@ export function PublicCheckInView() {
                 >
                   Regístrate aquí
                 </button>
+              )}
               </div>
             </CardContent>
           </Card>
