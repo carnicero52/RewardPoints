@@ -513,6 +513,64 @@ export function SettingsView() {
             </CardContent>
           </Card>
 
+          {/* Callmebot (Telegram) */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Callmebot (Telegram)</CardTitle>
+              <CardDescription> Notificaciones via Callmebot API</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-muted-foreground">Usa tu API key de Callmebot configurada en el servidor.</p>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={async () => {
+                  try {
+                    const res = await fetch('/api/notifications/test', {
+                      method: 'POST',
+                      headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ channel: 'callmebot' })
+                    })
+                    const data = await res.json()
+                    if (res.ok && data.success) toast.success('✅ Mensaje de prueba enviado por Callmebot')
+                    else toast.error(data.error || 'Error al enviar')
+                  } catch (e) { toast.error('Error de conexión') }
+                }}
+              >
+                Probar Callmebot
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Callmebot (WhatsApp) */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Callmebot (WhatsApp)</CardTitle>
+              <CardDescription> Notificaciones via WhatsApp API</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-muted-foreground">Envía notificaciones por WhatsApp via Callmebot.</p>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={async () => {
+                  try {
+                    const res = await fetch('/api/notifications/test', {
+                      method: 'POST',
+                      headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ channel: 'whatsapp' })
+                    })
+                    const data = await res.json()
+                    if (res.ok && data.success) toast.success('✅ Mensaje de prueba enviado por WhatsApp')
+                    else toast.error(data.error || 'Error al enviar')
+                  } catch (e) { toast.error('Error de conexión') }
+                }}
+              >
+                Probar WhatsApp
+              </Button>
+            </CardContent>
+          </Card>
+
           {/* Notification Preferences */}
           <Card>
             <CardHeader>
