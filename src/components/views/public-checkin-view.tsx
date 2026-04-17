@@ -182,16 +182,28 @@ export function PublicCheckInView() {
       }
 
       if (data.checkIn && data.customer) {
-        setCurrentPoints(data.customer.totalPoints ?? 0)
-        setTotalVisits(data.customer.totalVisits ?? 0)
-        setProgress(data.progress || null)
-        setCooldownInfo(null) // Clear cooldown after successful check-in
+        setCurrentPoints(Number(data.customer.totalPoints) || 0)
+        setTotalVisits(Number(data.customer.totalVisits) || 0)
         
-        // Update business info if returned
+        // Build progress from business config
+        const biz = data.business || {}
+        setProgress({
+          current: Number(data.customer.totalPoints) || 0,
+          needed: biz.pointsForReward || 10,
+          visitsUntilReward: Math.max(0, (biz.pointsForReward || 10) - (Number(data.customer.totalVisits) || 0)),
+          reward: biz.rewardDescription || 'Premio por configurar',
+          rewardImage: biz.rewardImageUrl || null,
+          pointsPerFrequency: biz.pointsPerFrequency || 1,
+          frequency: biz.frequency || 1
+        })
+        
+        setCooldownInfo(null)
+        setStep('success')
+        
         if (data.business) {
-          setBusinessName(data.business?.name || businessName)
-          setBusinessLogo(data.business?.logo || businessLogo)
-          setBrandColor(data.business?.brandColor || brandColor)
+          setBusinessName(data.business.name || businessName)
+          setBusinessLogo(data.business.logo || businessLogo)
+          setBrandColor(data.business.brandColor || brandColor)
         }
         
         if (data.checkIn.pointsEarned && data.checkIn.pointsEarned > 0) {
