@@ -1,33 +1,33 @@
 @import "tailwindcss";
 
-/* Dark mode (default) */
+/* Dark mode (default) - SIGA-RH colors */
 :root, .dark {
-  --background: #0f0f23;
+  --background: #0f172a;
   --foreground: #e2e8f0;
-  --card: #1a1a2e;
+  --card: #1e293b;
   --card-foreground: #e2e8f0;
-  --popover: #1a1a2e;
+  --popover: #1e293b;
   --popover-foreground: #e2e8f0;
-  --primary: #6366f1;
+  --primary: #0d9488;
   --primary-foreground: #ffffff;
-  --secondary: #1e1e3f;
+  --secondary: #1e293b;
   --secondary-foreground: #e2e8f0;
-  --muted: #1e1e3f;
+  --muted: #1e293b;
   --muted-foreground: #94a3b8;
-  --accent: #6366f1;
+  --accent: #0d9488;
   --accent-foreground: #ffffff;
   --destructive: #7f1d1d;
   --destructive-foreground: #fecaca;
-  --border: #2d2d4a;
-  --input: #2d2d4a;
-  --ring: #6366f1;
-  --sidebar-bg: linear-gradient(to bottom, #1e1e3f, #0f0f23);
+  --border: #334155;
+  --input: #334155;
+  --ring: #0d9488;
+  --sidebar-bg: #020617;
   --text-primary: #ffffff;
   --text-secondary: #94a3b8;
   --text-muted: #64748b;
 }
 
-/* Light mode */
+/* Light mode - SIGA-RH colors */
 .light {
   --background: #f8fafc;
   --foreground: #1e293b;
@@ -35,20 +35,20 @@
   --card-foreground: #1e293b;
   --popover: #ffffff;
   --popover-foreground: #1e293b;
-  --primary: #4f46e5;
+  --primary: #0f766e;
   --primary-foreground: #ffffff;
   --secondary: #f1f5f9;
   --secondary-foreground: #1e293b;
   --muted: #f1f5f9;
   --muted-foreground: #64748b;
-  --accent: #e0e7ff;
-  --accent-foreground: #4f46e5;
+  --accent: #0f766e;
+  --accent-foreground: #ffffff;
   --destructive: #fef2f2;
   --destructive-foreground: #dc2626;
   --border: #e2e8f0;
   --input: #e2e8f0;
-  --ring: #4f46e5;
-  --sidebar-bg: linear-gradient(to bottom, #eef2ff, #e0e7ff);
+  --ring: #0f766e;
+  --sidebar-bg: #0f172a;
   --text-primary: #1e293b;
   --text-secondary: #475569;
   --text-muted: #94a3b8;
@@ -89,14 +89,14 @@ body {
 
 /* Override hardcoded colors */
 .text-white { color: var(--text-primary) !important; }
-.text-purple-200 { color: var(--text-secondary) !important; }
-.text-purple-300 { color: var(--text-secondary) !important; }
-.text-purple-400 { color: var(--text-secondary) !important; }
+.text-slate-200 { color: var(--text-secondary) !important; }
+.text-slate-300 { color: var(--text-secondary) !important; }
+.text-slate-400 { color: var(--text-secondary) !important; }
 .hover\:text-white:hover { color: var(--text-primary) !important; }
-.bg-purple-900 { background: var(--secondary) !important; }
-.bg-purple-800 { background: var(--muted) !important; }
+.bg-slate-900 { background: var(--secondary) !important; }
+.bg-slate-800 { background: var(--muted) !important; }
 .bg-white\/10, .bg-white\/5 { background: var(--card) !important; }
-.border-purple-500\/30 { border-color: var(--border) !important; }
+.border-slate-500\/30 { border-color: var(--border) !important; }
 .border-white\/10 { border-color: var(--border) !important; }
 
 .bg-gradient-to-b { background: var(--sidebar-bg) !important; }
