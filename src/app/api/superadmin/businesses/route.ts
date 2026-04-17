@@ -8,6 +8,9 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const secret = searchParams.get('secret')
 
+    console.log('Secret received:', secret)
+    console.log('Expected:', SUPERADMIN_SECRET)
+
     if (secret !== SUPERADMIN_SECRET) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
