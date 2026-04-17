@@ -27,31 +27,31 @@
   --text-muted: #64748b;
 }
 
-/* Light mode - Much darker for less white */
+/* Light mode - SIGA-RH palette */
 .light {
-  --background: #cbd5e1;
+  --background: #e2e8f0;
   --foreground: #0f172a;
-  --card: #94a3b8;
+  --card: #f1f5f9;
   --card-foreground: #0f172a;
-  --popover: #94a3b8;
+  --popover: #f1f5f9;
   --popover-foreground: #0f172a;
-  --primary: #0f766e;
+  --primary: #0d9488;
   --primary-foreground: #ffffff;
-  --secondary: #94a3b8;
+  --secondary: #cbd5e1;
   --secondary-foreground: #0f172a;
-  --muted: #94a3b8;
+  --muted: #cbd5e1;
   --muted-foreground: #475569;
-  --accent: #0f766e;
+  --accent: #0d9488;
   --accent-foreground: #ffffff;
   --destructive: #fef2f2;
   --destructive-foreground: #dc2626;
-  --border: #64748b;
-  --input: #64748b;
-  --ring: #0f766e;
+  --border: #94a3b8;
+  --input: #94a3b8;
+  --ring: #0d9488;
   --sidebar-bg: #1e293b;
   --text-primary: #0f172a;
   --text-secondary: #334155;
-  --text-muted: #475569;
+  --text-muted: #64748b;
 }
 
 @theme inline {
