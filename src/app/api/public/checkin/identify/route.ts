@@ -1,4 +1,5 @@
 import { db } from '@/lib/db'
+import { notifyCustomer, buildCheckInMessage, buildRewardMessage } from '@/lib/telegram-notify'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(request: NextRequest) {
@@ -108,7 +109,9 @@ export async function POST(request: NextRequest) {
 
       // Calculate points to earn based on frequency
       const newVisitCount = customer.totalVisits + 1
+      const previousVisits = customer.totalVisits
       const pointsEarned = (newVisitCount % progressNeeded === 0) ? (business.pointsPerFrequency || 1) : 0
+      const justReachedReward = previousVisits < progressNeeded && newVisitCount >= progressNeeded
 
       // Update customer
       await db.customer.update({
@@ -133,12 +136,79 @@ export async function POST(request: NextRequest) {
         },
       })
 
+      // Send Telegram notification after check-in
+      const sendNotification = async () => {
+        try {
+          const customerForNotify = await db.customer.findUnique({
+            where: { id: customer.id },
+            select: {
+              name: true,
+              telegram: true,
+              callmebot: true,
+              phone: true,
+              totalPoints: true,
+              totalVisits: true,
+            },
+          })
+
+          if (!customerForNotify) return
+
+          const totalPoints = customerForNotify.totalPoints
+          const totalVisits = customerForNotify.totalVisits
+          const visitsUntilReward = Math.max(0, progressNeeded - totalVisits)
+
+          // Send reward notification if they just reached it
+          if (justReachedReward && business.rewardDescription) {
+            const rewardMessage = buildRewardMessage({
+              customerName: customerForNotify.name,
+              businessName: business.name,
+              rewardDescription: business.rewardDescription,
+            })
+            await notifyCustomer({
+              customer: {
+                telegram: customerForNotify.telegram,
+                callmebot: customerForNotify.callmebot,
+                phone: customerForNotify.phone,
+              },
+              title: '🎉 ¡Premio Disponible!',
+              message: rewardMessage,
+            })
+          } else {
+            // Send check-in confirmation
+            const checkInMessage = buildCheckInMessage({
+              customerName: customerForNotify.name,
+              businessName: business.name,
+              pointsEarned,
+              totalPoints,
+              visitsUntilReward,
+              rewardDescription: business.rewardDescription,
+            })
+            await notifyCustomer({
+              customer: {
+                telegram: customerForNotify.telegram,
+                callmebot: customerForNotify.callmebot,
+                phone: customerForNotify.phone,
+              },
+              title: 'Check-in Confirmado',
+              message: checkInMessage,
+            })
+          }
+        } catch (notifyError) {
+          console.error('Telegram notification error:', notifyError)
+          // Don't fail check-in if notification fails
+        }
+      }
+
+      // Fire notification asynchronously (don't wait)
+      sendNotification()
+
       checkInResult = {
         success: true,
         message: pointsEarned > 0 
           ? `¡Ganaste ${pointsEarned} punto(s)!` 
           : 'Visita registrada',
         pointsEarned,
+        rewardReached: justReachedReward,
       }
     }
 

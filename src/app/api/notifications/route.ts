@@ -1,16 +1,20 @@
 import { db } from '@/lib/db'
 import { getAuthPayload } from '@/lib/auth'
+import { notifyCustomer } from '@/lib/telegram-notify'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(request: NextRequest) {
   try {
     const { businessId } = getAuthPayload(request)
     const body = await request.json()
-    const { type, title, message, channel, customerIds, scheduledAt, customerFilter } = body
+    const { type, title, message, channel, customerIds, scheduledAt, customerFilter, apiKey } = body
 
     if (!title?.trim() || !message?.trim()) {
       return NextResponse.json({ error: 'Title and message required' }, { status: 400 })
     }
+
+    // Get Callmebot API key from env or request
+    const callmebotApiKey = apiKey || process.env.CALLMEBOT_API_KEY
 
     // If no specific customers, send to all active customers
     let targetCustomerIds = customerIds
@@ -26,11 +30,49 @@ export async function POST(request: NextRequest) {
     // If scheduled, set status to 'scheduled' instead of 'pending'
     const isScheduled = scheduledAt && new Date(scheduledAt) > new Date()
     const status = isScheduled ? 'scheduled' : 'pending'
-    
-    // Create notifications for each customer
-    const notifications = await Promise.all(
-      targetCustomerIds.map((customerId: string) =>
-        db.notification.create({
+
+    // Determine which channels to use
+    const useEmail = !channel || channel === 'all' || channel === 'email'
+    const useTelegram = channel === 'all' || channel === 'telegram'
+    const useCallmebot = channel === 'all' || channel === 'callmebot'
+
+    // Create database notifications and optionally send Telegram
+    const notifications: any[] = []
+    const telegramResults: { customerId: string; success: boolean; channels: string[] }[] = []
+
+    for (const customerId of targetCustomerIds) {
+      // Get customer data for Telegram
+      let customerData: { id: string; name: string; telegram?: string | null; callmebot?: string | null; phone?: string | null } | null = null
+      if (useTelegram || useCallmebot) {
+        customerData = await db.customer.findUnique({
+          where: { id: customerId },
+          select: { id: true, name: true, telegram: true, callmebot: true, phone: true },
+        })
+      }
+
+      // Send Telegram/Callmebot notifications
+      if ((useTelegram || useCallmebot) && customerData && (customerData.telegram || customerData.callmebot)) {
+        const telegramResult = await notifyCustomer({
+          customer: {
+            telegram: useTelegram ? customerData.telegram : null,
+            callmebot: useCallmebot ? customerData.callmebot : null,
+            phone: customerData.phone,
+          },
+          title: title.trim(),
+          message: message.trim(),
+          callmebotApiKey: callmebotApiKey,
+        })
+
+        telegramResults.push({
+          customerId,
+          success: telegramResult.success,
+          channels: telegramResult.channels,
+        })
+      }
+
+      // Create database notification (always for email/marketing)
+      if (useEmail) {
+        const notification = await db.notification.create({
           data: {
             businessId,
             customerId,
@@ -42,14 +84,26 @@ export async function POST(request: NextRequest) {
             scheduledAt: isScheduled ? new Date(scheduledAt) : null,
           },
         })
-      )
-    )
+        notifications.push(notification)
+      }
+    }
+
+    const telegramSent = telegramResults.filter(r => r.success).length
+    const telegramFailed = telegramResults.filter(r => !r.success).length
 
     const action = isScheduled ? 'programadas' : 'enviadas'
+    let responseMessage = `${notifications.length} notificaciones ${action}`
+
+    if (telegramSent > 0) {
+      responseMessage += `, ${telegramSent} Telegram/WhatsApp`
+    }
+
     return NextResponse.json({
       success: true,
       sent: notifications.length,
-      message: `${notifications.length} notificaciones ${action}`,
+      telegramSent,
+      telegramFailed,
+      message: responseMessage,
     })
   } catch (error: any) {
     console.error('Notifications POST error:', error)

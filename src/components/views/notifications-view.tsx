@@ -10,7 +10,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { toast } from 'sonner'
-import { Send, Mail, MessageSquare, Calendar, Users, Clock, SendHorizontal } from 'lucide-react'
+import { Send, Mail, MessageSquare, Calendar, Users, Clock, SendHorizontal, UserX, Zap } from 'lucide-react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 
@@ -51,6 +51,10 @@ export function NotificationsView() {
     // Customer selection
     customerIds: [] as string[],
     customerFilter: 'all' as 'all' | 'specific',
+    
+    // Inactive customers
+    inactiveDays: 30,
+    sendToInactives: false,
   })
 
   useEffect(() => {
@@ -85,18 +89,38 @@ export function NotificationsView() {
         scheduledAt: form.scheduled ? `${form.scheduleDate}T${form.scheduleTime}:00` : null,
       }
       
-      const res = await fetch('/api/notifications', {
-        method: 'POST',
+      // If sending to inactive customers, use the send API
+      let endpoint = '/api/notifications'
+      let method = 'POST'
+      
+      if (form.sendToInactives) {
+        endpoint = '/api/notifications/send'
+        payload.type = 'inactive'
+        payload.days = form.inactiveDays
+        delete payload.title
+        delete payload.message
+        delete payload.customerIds
+      }
+      
+      const res = await fetch(endpoint, {
+        method,
         headers: { ...authHeaders(), 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       })
 
       if (!res.ok) throw new Error('Error sending notifications')
 
-      if (form.scheduled) {
+      const data = await res.json()
+
+      if (form.sendToInactives) {
+        toast.success(`Notificación enviada a ${data.sent || data.failed || 0} clientes inactivos`)
+      } else if (form.scheduled) {
         toast.success(`Notificación programada para ${form.scheduleDate} a las ${form.scheduleTime}`)
       } else {
-        toast.success('Notificaciones enviadas')
+        const msg = data.telegramSent > 0 
+          ? `Enviadas: ${data.sent} email, ${data.telegramSent} Telegram/WhatsApp`
+          : `${data.sent || 0} notificaciones enviadas`
+        toast.success(msg)
       }
       
       setForm({
@@ -330,15 +354,71 @@ export function NotificationsView() {
         </CardContent>
       </Card>
 
+      {/* Inactive Customers */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <UserX className="h-5 w-5" />
+            Clientes Inactivos
+          </CardTitle>
+          <CardDescription>Notificar a clientes que no han visitado en X días</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center gap-2">
+            <Checkbox 
+              id="sendToInactives"
+              checked={form.sendToInactives}
+              onCheckedChange={(v) => setForm({...form, sendToInactives: v === true})}
+            />
+            <Label htmlFor="sendToInactives">Enviar a clientes inactivos</Label>
+          </div>
+
+          {form.sendToInactives && (
+            <div className="animate-in fade-in slide-in-from-top-2 space-y-4">
+              <div>
+                <Label>Días sin visita</Label>
+                <Select 
+                  value={form.inactiveDays.toString()} 
+                  onValueChange={(v) => setForm({...form, inactiveDays: parseInt(v)})}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="14">14 días</SelectItem>
+                    <SelectItem value="21">21 días</SelectItem>
+                    <SelectItem value="30">30 días</SelectItem>
+                    <SelectItem value="45">45 días</SelectItem>
+                    <SelectItem value="60">60 días</SelectItem>
+                    <SelectItem value="90">90 días</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="text-sm bg-muted p-3 rounded-lg">
+                <Zap className="h-4 w-4 inline mr-1" />
+                Se les enviará un recordatorio de regreso con su progreso hacia el premio
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Send Button */}
       <div className="flex justify-end gap-2">
         <Button 
           size="lg"
           onClick={handleSend}
           disabled={sending}
+          variant={form.sendToInactives ? 'default' : 'default'}
         >
           {sending ? (
             <>Enviando...</>
+          ) : form.sendToInactives ? (
+            <>
+              <UserX className="h-5 w-5 mr-2" />
+              Notificar {form.inactiveDays}+ días sin visita
+            </>
           ) : form.scheduled ? (
             <>
               <Calendar className="h-5 w-5 mr-2" />
