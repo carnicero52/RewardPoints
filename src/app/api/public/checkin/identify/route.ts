@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
     const progressNeeded = business.pointsForReward || 10
 
     // If check-in requested, validate and record
-    let checkInResult: { success: boolean; message: string; pointsEarned?: number } | null = null
+    let checkInResult: { success: boolean; message: string; pointsEarned?: number; rewardReached?: boolean } | null = null
     
     if (checkIn && customer) {
       const now = new Date()

@@ -26,7 +26,7 @@ const authHeaders = () => ({
   Authorization: `Bearer ${localStorage.getItem('royalty_token')}`,
 })
 
-type NotificationType = 'marketing' | 'collection' | 'reminder' | 'promotion' | 'birthday'
+type NotificationType = 'marketing' | 'collection' | 'reminder' | 'promotion' | 'birthday' | 'inactive'
 type Channel = 'email' | 'telegram' | 'callmebot' | 'all'
 
 export function NotificationsView() {
@@ -83,23 +83,21 @@ export function NotificationsView() {
 
     setSending(true)
     try {
-      const payload = {
+      let endpoint = '/api/notifications'
+      let method = 'POST'
+      let payload: any = {
         ...form,
         // If scheduled, send the schedule datetime
         scheduledAt: form.scheduled ? `${form.scheduleDate}T${form.scheduleTime}:00` : null,
       }
       
       // If sending to inactive customers, use the send API
-      let endpoint = '/api/notifications'
-      let method = 'POST'
-      
       if (form.sendToInactives) {
         endpoint = '/api/notifications/send'
-        payload.type = 'inactive'
-        payload.days = form.inactiveDays
-        delete payload.title
-        delete payload.message
-        delete payload.customerIds
+        payload = {
+          type: 'inactive',
+          days: form.inactiveDays,
+        }
       }
       
       const res = await fetch(endpoint, {
