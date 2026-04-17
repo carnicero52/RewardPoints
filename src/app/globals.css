@@ -27,31 +27,31 @@
   --text-muted: #64748b;
 }
 
-/* Light mode - SIGA-RH colors */
+/* Light mode - SIGA-RH colors - Fixed contrast */
 .light {
-  --background: #f8fafc;
-  --foreground: #1e293b;
-  --card: #ffffff;
-  --card-foreground: #1e293b;
-  --popover: #ffffff;
-  --popover-foreground: #1e293b;
+  --background: #e2e8f0;
+  --foreground: #0f172a;
+  --card: #f1f5f9;
+  --card-foreground: #0f172a;
+  --popover: #f1f5f9;
+  --popover-foreground: #0f172a;
   --primary: #0f766e;
   --primary-foreground: #ffffff;
-  --secondary: #f1f5f9;
-  --secondary-foreground: #1e293b;
-  --muted: #f1f5f9;
-  --muted-foreground: #64748b;
+  --secondary: #cbd5e1;
+  --secondary-foreground: #0f172a;
+  --muted: #cbd5e1;
+  --muted-foreground: #475569;
   --accent: #0f766e;
   --accent-foreground: #ffffff;
   --destructive: #fef2f2;
   --destructive-foreground: #dc2626;
-  --border: #e2e8f0;
-  --input: #e2e8f0;
+  --border: #94a3b8;
+  --input: #94a3b8;
   --ring: #0f766e;
-  --sidebar-bg: #0f172a;
-  --text-primary: #1e293b;
-  --text-secondary: #475569;
-  --text-muted: #94a3b8;
+  --sidebar-bg: #1e293b;
+  --text-primary: #0f172a;
+  --text-secondary: #334155;
+  --text-muted: #64748b;
 }
 
 @theme inline {
