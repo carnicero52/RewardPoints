@@ -69,6 +69,6 @@ export async function GET(request: NextRequest) {
     })
   } catch (error: any) {
     console.error('Superadmin GET error:', error)
-    return NextResponse.json({ error: 'Server error' }, { status: 500 })
+    return NextResponse.json({ error: 'Server error: ' + error.message }, { status: 500 })
   }
 }

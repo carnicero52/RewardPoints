@@ -26,6 +26,8 @@ export async function PUT(request: NextRequest) {
     const { businessId } = getAuthPayload(request)
     const body = await request.json()
 
+    console.log('PUT /api/business - businessId:', businessId)
+
     const business = await db.business.update({
       where: { id: businessId },
       data: {
