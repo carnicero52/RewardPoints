@@ -122,6 +122,37 @@ body {
 .border-purple-500\/30 { border-color: rgba(20,184,166,0.3) !important; }
 .border-teal-500\/30 { border-color: rgba(20,184,166,0.3) !important; }
 
-/* Buttons - keep primary colors */
-.btn-primary, .bg-primary { background-color: var(--primary) !important; }
-.bg-teal-500, .bg-teal-600 { background-color: var(--primary) !important; }
+/* White backgrounds - add dark text for contrast */
+.bg-white, .bg-white\/100, .bg-white\/80, .bg-white\/60 {
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
+}
+
+/* Ensure text on light backgrounds is dark */
+.bg-white h1, .bg-white h2, .bg-white h3, .bg-white h4,
+.bg-white p, .bg-white span, .bg-white div {
+  color: #0f172a !important;
+}
+
+/* Light gradient sections - use darker text */
+.bg-gradient-to-br.from-white, 
+.bg-gradient-to-r.from-white,
+.from-gray-50, .from-gray-100, .from-gray-200 {
+  background: linear-gradient(to bottom, #e2e8f0, #cbd5e1) !important;
+}
+
+.from-gray-50 h1, .from-gray-50 h2, .from-gray-50 h3,
+.from-gray-100 h1, .from-gray-100 h2, .from-gray-100 h3 {
+  color: #0f172a !important;
+}
+
+/* Text that might be too light on dark backgrounds */
+.text-white\/80, .text-white\/70, .text-white\/60 {
+  color: rgba(255,255,255,0.9) !important;
+}
+
+/* Buttons with light backgrounds - dark text */
+.bg-gray-50, .bg-gray-100, .bg-gray-200 {
+  background-color: #e2e8f0 !important;
+  color: #0f172a !important;
+}
