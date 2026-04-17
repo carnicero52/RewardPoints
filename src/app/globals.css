@@ -1,19 +1,19 @@
 @import "tailwindcss";
 
-/* Dark mode - Lighter warm background with teal accents */
+/* Dark mode - Original SIGA-RH inspired palette */
 :root, .dark {
-  --background: #64748b;  /* Lighter warm gray - 25% lighter */
-  --foreground: #ccfbf1;
-  --card: #475569;
+  --background: #0f172a;
+  --foreground: #e2e8f0;
+  --card: #1e293b;
   --card-foreground: #e2e8f0;
-  --popover: #475569;
+  --popover: #1e293b;
   --popover-foreground: #e2e8f0;
   --primary: #0d9488;
   --primary-foreground: #ffffff;
-  --secondary: #475569;
+  --secondary: #334155;
   --secondary-foreground: #e2e8f0;
   --muted: #475569;
-  --muted-foreground: #5eead4;
+  --muted-foreground: #94a3b8;
   --accent: #14b8a6;
   --accent-foreground: #ffffff;
   --destructive: #7f1d1d;
@@ -21,10 +21,10 @@
   --border: #475569;
   --input: #475569;
   --ring: #0d9488;
-  --sidebar-bg: #1e293b;  /* Slightly lighter sidebar */
-  --text-primary: #ffffff;
-  --text-secondary: #5eead4;
-  --text-muted: #2dd4bf;
+  --sidebar-bg: #020617;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
 }
 
 @theme inline {
@@ -60,8 +60,7 @@ body {
   min-height: 100vh;
 }
 
-/* ULTRA AGGRESSIVE TEXT VISIBILITY OVERRIDES */
-
+/* Text visibility overrides */
 h1, h2, h3, h4, h5, h6, p, span, div, li, td, th, label, a, small {
   color: var(--foreground) !important;
 }
@@ -71,23 +70,11 @@ h1, h2, h3, h4, h5, h6, p, span, div, li, td, th, label, a, small {
   border: 1px solid var(--border) !important;
 }
 
-.bg-white, .bg-white\/100, .bg-white\/90, .bg-white\/80, .bg-white\/70, .bg-white\/60, .bg-white\/50 {
+.bg-white, .bg-white\/100 {
   background-color: var(--card) !important;
 }
 .bg-white *, .bg-white\/100 * {
   color: var(--foreground) !important;
-}
-
-.bg-gray-50, .bg-gray-100, .bg-gray-200, .bg-gray-300 {
-  background-color: var(--secondary) !important;
-}
-.bg-gray-50 *, .bg-gray-100 *, .bg-gray-200 * {
-  color: var(--foreground) !important;
-}
-
-.bg-gradient-to-b, .bg-gradient-to-t, .bg-gradient-to-l, .bg-gradient-to-r,
-.bg-gradient-to-br, .bg-gradient-to-bl, .bg-gradient-to-tr, .bg-gradient-to-tl {
-  background: var(--background) !important;
 }
 
 .text-white { color: var(--text-primary) !important; }
@@ -95,15 +82,6 @@ h1, h2, h3, h4, h5, h6, p, span, div, li, td, th, label, a, small {
 .text-slate-100, .text-slate-200 { color: var(--text-primary) !important; }
 .text-slate-300, .text-gray-300 { color: var(--text-secondary) !important; }
 .text-slate-400, .text-gray-400 { color: var(--text-muted) !important; }
-.text-gray-500 { color: var(--text-muted) !important; }
-
-.text-white\/50, .text-white\/60, .text-white\/70, .text-white\/80, .text-white\/90, .text-white\/95 {
-  color: var(--text-secondary) !important;
-}
-
-.text-purple-200, .text-purple-300, .text-purple-400 {
-  color: var(--text-secondary) !important;
-}
 
 input, textarea, select {
   background-color: var(--secondary) !important;
@@ -117,10 +95,6 @@ input::placeholder, textarea::placeholder {
 table, thead, tbody, tr, th, td {
   background-color: var(--card) !important;
   color: var(--foreground) !important;
-}
-
-.border-white\/10, .border-white\/20, .border-white\/30 {
-  border-color: var(--border) !important;
 }
 
 button, .btn {
