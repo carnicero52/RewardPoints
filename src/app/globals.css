@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
-/* Dark mode (default) - SIGA-RH colors */
-:root, .dark {
+/* Default to dark mode with SIGA-RH colors */
+:root, .dark, body {
   --background: #0f172a;
   --foreground: #e2e8f0;
   --card: #1e293b;
@@ -27,32 +27,8 @@
   --text-muted: #64748b;
 }
 
-/* Light mode - SIGA-RH palette */
-.light {
-  --background: #e2e8f0;
-  --foreground: #0f172a;
-  --card: #f1f5f9;
-  --card-foreground: #0f172a;
-  --popover: #f1f5f9;
-  --popover-foreground: #0f172a;
-  --primary: #0d9488;
-  --primary-foreground: #ffffff;
-  --secondary: #cbd5e1;
-  --secondary-foreground: #0f172a;
-  --muted: #cbd5e1;
-  --muted-foreground: #475569;
-  --accent: #0d9488;
-  --accent-foreground: #ffffff;
-  --destructive: #fef2f2;
-  --destructive-foreground: #dc2626;
-  --border: #94a3b8;
-  --input: #94a3b8;
-  --ring: #0d9488;
-  --sidebar-bg: #1e293b;
-  --text-primary: #0f172a;
-  --text-secondary: #334155;
-  --text-muted: #64748b;
-}
+/* Remove light mode entirely - use dark by default */
+/* This forces the app to always use the dark theme */
 
 @theme inline {
   --color-background: var(--background);
@@ -81,13 +57,13 @@
 }
 
 body {
-  background: var(--background);
+  background: var(--background) !important;
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
   min-height: 100vh;
 }
 
-/* Override hardcoded colors */
+/* Dark mode overrides - match SIGA-RH */
 .text-white { color: var(--text-primary) !important; }
 .text-slate-200 { color: var(--text-secondary) !important; }
 .text-slate-300 { color: var(--text-secondary) !important; }
@@ -98,73 +74,27 @@ body {
 .bg-white\/10, .bg-white\/5 { background: var(--card) !important; }
 .border-slate-500\/30 { border-color: var(--border) !important; }
 .border-white\/10 { border-color: var(--border) !important; }
-
 .bg-gradient-to-b { background: var(--sidebar-bg) !important; }
 
-/* Force light mode to use SIGA-RH palette - More aggressive overrides */
-.light {
-  --background: #e2e8f0 !important;
-  --foreground: #0f172a !important;
-  --card: #f8fafc !important;
-  --card-foreground: #0f172a !important;
-  --popover: #f8fafc !important;
-  --popover-foreground: #0f172a !important;
-  --primary: #0d9488 !important;
-  --primary-foreground: #ffffff !important;
-  --secondary: #cbd5e1 !important;
-  --secondary-foreground: #0f172a !important;
-  --muted: #cbd5e1 !important;
-  --muted-foreground: #475569 !important;
-  --accent: #0d9488 !important;
-  --accent-foreground: #ffffff !important;
-  --destructive: #fef2f2 !important;
-  --destructive-foreground: #dc2626 !important;
-  --border: #cbd5e1 !important;
-  --input: #cbd5e1 !important;
-  --ring: #0d9488 !important;
+/* Force all backgrounds to use dark theme colors */
+.bg-white { background-color: var(--card) !important; }
+.bg-gray-50, .bg-gray-100, .bg-gray-200 { background-color: var(--secondary) !important; }
+.bg-slate-50, .bg-slate-100 { background-color: var(--secondary) !important; }
+.bg-purple-500\/10, .bg-purple-500\/20, .bg-purple-500\/30 { background-color: var(--secondary) !important; }
+.bg-purple-900\/50, .bg-purple-900\/30, .bg-purple-900\/50 { background-color: var(--secondary) !important; }
+.bg-indigo-900\/50 { background-color: var(--secondary) !important; }
+.from-purple-900, .from-indigo-900 { background-color: var(--background) !important; }
+.via-indigo-900 { background-color: var(--secondary) !important; }
+.to-violet-800 { background-color: var(--secondary) !important; }
+.bg-gradient-to-br { background: var(--background) !important; }
+.bg-gradient-to-r { background: var(--background) !important; }
+
+/* Ensure cards use dark theme */
+.rounded-lg, .rounded-xl, .rounded-md {
+  background-color: var(--card) !important;
+  border-color: var(--border) !important;
 }
 
-/* Override hardcoded backgrounds */
-.light .bg-white { background-color: #f8fafc !important; }
-.light .bg-gray-50 { background-color: #e2e8f0 !important; }
-.light .bg-gray-100 { background-color: #e2e8f0 !important; }
-.light .bg-gray-200 { background-color: #cbd5e1 !important; }
-.light .bg-slate-50 { background-color: #e2e8f0 !important; }
-.light .bg-slate-100 { background-color: #e2e8f0 !important; }
-
-/* Override gradient backgrounds in public check-in page */
-.light .min-h-screen,
-.light .from-purple-900,
-.light .via-indigo-900,
-.light .to-violet-800,
-.light .bg-gradient-to-br,
-.light .bg-gradient-to-r {
-  background: #e2e8f0 !important;
-}
-
-/* Cards in light mode */
-.light .card,
-.light [class*="Card"],
-.light .rounded-lg,
-.light .rounded-xl {
-  background-color: #f8fafc !important;
-  border-color: #cbd5e1 !important;
-}
-
-/* Text colors that are too light */
-.light .text-gray-500,
-.light .text-gray-400,
-.light .text-gray-300,
-.light .text-slate-400,
-.light .text-slate-300 {
-  color: #475569 !important;
-}
-
-/* Purple-tinted backgrounds to grayscale */
-.light .bg-purple-500\/10,
-.light .bg-purple-500\/20,
-.light .bg-purple-500\/30,
-.light .bg-purple-900\/50,
-.light .bg-purple-900\/30 {
-  background-color: #cbd5e1 !important;
-}
+/* Text contrast fixes */
+.text-gray-500, .text-gray-400, .text-gray-300 { color: var(--text-secondary) !important; }
+.text-purple-200, .text-purple-300, .text-purple-400 { color: var(--text-secondary) !important; }
