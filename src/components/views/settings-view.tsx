@@ -145,6 +145,10 @@ export function SettingsView() {
             <Bell className="h-4 w-4 mr-2" />
             Notificaciones
           </TabsTrigger>
+          <TabsTrigger value="callmebot">
+            <Bell className="h-4 w-4 mr-2" />
+            Callmebot
+          </TabsTrigger>
           <TabsTrigger value="qr">
             <QrCode className="h-4 w-4 mr-2" />
             QR Code
@@ -503,6 +507,34 @@ export function SettingsView() {
                   <RefreshCw className="h-4 w-4 mr-2" />
                   Regenerar
                 </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Callmebot */}
+        <TabsContent value="callmebot" className="space-y-4 mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Callmebot</CardTitle>
+              <CardDescription>Notificaciones via Callmebot</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label>API Key</Label>
+                <Input
+                  value={form.callmebotApiKey}
+                  onChange={(e) => setForm({ ...form, callmebotApiKey: e.target.value })}
+                  placeholder="Tu API key"
+                />
+              </div>
+              <div>
+                <Label>Teléfono</Label>
+                <Input
+                  value={form.callmebotPhone}
+                  onChange={(e) => setForm({ ...form, callmebotPhone: e.target.value })}
+                  placeholder="+584121234567"
+                />
               </div>
             </CardContent>
           </Card>
