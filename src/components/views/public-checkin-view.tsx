@@ -187,6 +187,13 @@ export function PublicCheckInView() {
         setProgress(data.progress || null)
         setCooldownInfo(null) // Clear cooldown after successful check-in
         
+        // Update business info if returned
+        if (data.business) {
+          setBusinessName(data.business?.name || businessName)
+          setBusinessLogo(data.business?.logo || businessLogo)
+          setBrandColor(data.business?.brandColor || brandColor)
+        }
+        
         if (data.checkIn.pointsEarned && data.checkIn.pointsEarned > 0) {
           toast.success(`🎉 ¡Ganaste ${data.checkIn.pointsEarned} punto(s)!`)
         } else {
