@@ -470,6 +470,26 @@ export function SettingsView() {
                   </div>
                 </div>
               )}
+              {form.telegramEnabled && form.telegramChatId && (
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={async () => {
+                    try {
+                      const res = await fetch('/api/notifications/test', {
+                        method: 'POST',
+                        headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ channel: 'telegram' })
+                      })
+                      const data = await res.json()
+                      if (res.ok && data.success) toast.success('✅ Mensaje de prueba enviado')
+                      else toast.error(data.error || 'Error al enviar')
+                    } catch (e) { toast.error('Error de conexión') }
+                  }}
+                >
+                  Probar Conexión
+                </Button>
+              )}
             </CardContent>
           </Card>
 
