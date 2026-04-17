@@ -80,6 +80,29 @@ export function CustomersView() {
     }
   }
 
+  const handleEditCustomer = (customer: any) => {
+    setNewCustomer(customer)
+    setShowAddModal(true)
+  }
+
+  const handleDeleteCustomer = async (id: string) => {
+    if (!confirm('¿Estás seguro de borrar este cliente? Esta acción no se puede deshacer.')) return
+    
+    try {
+      const res = await fetch(`/api/customers/${id}`, {
+        method: 'DELETE',
+        headers: authHeaders()
+      })
+      
+      if (!res.ok) throw new Error('Error deleting customer')
+      
+      toast.success('Cliente borrado')
+      loadCustomers()
+    } catch (error: any) {
+      toast.error(error.message)
+    }
+  }
+
   const filtered = customers.filter(c => 
     c.name.toLowerCase().includes(search.toLowerCase()) ||
     c.email?.toLowerCase().includes(search.toLowerCase()) ||
@@ -132,6 +155,24 @@ export function CustomersView() {
                     <p className="text-xs text-purple-400 mt-1">
                       {customer.totalVisits} visitas
                     </p>
+                    <div className="flex gap-2 mt-2">
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        className="h-7 text-xs"
+                        onClick={() => handleEditCustomer(customer)}
+                      >
+                        Editar
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        variant="destructive"
+                        className="h-7 text-xs"
+                        onClick={() => handleDeleteCustomer(customer.id)}
+                      >
+                        Borrar
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </CardContent>

@@ -600,6 +600,40 @@ export function SettingsView() {
             </CardContent>
           </Card>
 
+          {/* Danger Zone */}
+          <Card className="border-red-500/50">
+            <CardHeader>
+              <CardTitle className="text-red-400">Zona de Peligro</CardTitle>
+              <CardDescription> Acciones irreversibles</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium">Borrar historial de transacciones</p>
+                  <p className="text-sm text-muted-foreground">Eliminar todas las transacciones (no clientes)</p>
+                </div>
+                <Button 
+                  variant="destructive" 
+                  size="sm"
+                  onClick={async () => {
+                    if (!confirm('¿Borrar todo el historial de transacciones? Esta acción no se puede deshacer.')) return
+                    try {
+                      const res = await fetch('/api/transactions/clear', {
+                        method: 'DELETE',
+                        headers: authHeaders()
+                      })
+                      const data = await res.json()
+                      if (res.ok && data.success) toast.success('✅ Historial borrado')
+                      else toast.error(data.error || 'Error al borrar')
+                    } catch (e) { toast.error('Error de conexión') }
+                  }}
+                >
+                  Borrar Historial
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Notification Preferences */}
           <Card>
             <CardHeader>
