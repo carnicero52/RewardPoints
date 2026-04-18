@@ -62,15 +62,19 @@ export function CustomersView() {
 
     setSaving(true)
     try {
-      const res = await fetch('/api/customers', {
-        method: 'POST',
+      const isEdit = newCustomer.id
+      const url = isEdit ? `/api/customers/${newCustomer.id}` : '/api/customers'
+      const method = isEdit ? 'PUT' : 'POST'
+      
+      const res = await fetch(url, {
+        method,
         headers: { ...authHeaders(), 'Content-Type': 'application/json' },
         body: JSON.stringify(newCustomer),
       })
 
-      if (!res.ok) throw new Error('Error creating customer')
+      if (!res.ok) throw new Error('Error saving customer')
 
-      toast.success('Cliente creado exitosamente')
+      toast.success(isEdit ? 'Cliente actualizado' : 'Cliente creado exitosamente')
       setShowAddModal(false)
       setNewCustomer({ name: '', email: '', phone: '', telegram: '', callmebot: '' })
       loadCustomers()
