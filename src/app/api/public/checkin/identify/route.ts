@@ -23,17 +23,13 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    if (qr) {
-      businessId = qr.businessId
-    } else {
-      // Fallback: find business directly by slug
-      const bizBySlug = await db.business.findUnique({
-        where: { slug: qrCode, active: true },
-        select: { id: true },
-      })
-      if (bizBySlug) {
-        businessId = bizBySlug.id
-      }
+    // Use qr as slug to find business
+    const businessBySlug = await db.business.findUnique({
+      where: { slug: qrCode, active: true },
+      select: { id: true },
+    })
+    if (businessBySlug) {
+      businessId = businessBySlug.id
     }
 
     if (!businessId) {
