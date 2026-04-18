@@ -450,6 +450,24 @@ export function SettingsView() {
                   </div>
                 </div>
               )}
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={async () => {
+                  try {
+                    const res = await fetch('/api/notifications/test', {
+                      method: 'POST',
+                      headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ channel: 'telegram' })
+                    })
+                    const data = await res.json()
+                    if (res.ok && data.success) toast.success('✅ Mensaje enviado')
+                    else toast.error(data.error || 'Error')
+                  } catch (e) { toast.error('Error') }
+                }}
+              >
+                Probar Telegram
+              </Button>
             </CardContent>
           </Card>
         </TabsContent>
