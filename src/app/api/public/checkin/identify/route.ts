@@ -1,5 +1,6 @@
 import { db } from '@/lib/db'
 import { notifyCustomer, buildCheckInMessage, buildRewardMessage } from '@/lib/telegram-notify'
+import { sendCheckinProgressEmail } from '@/lib/email-notify'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(request: NextRequest) {
@@ -131,6 +132,20 @@ export async function POST(request: NextRequest) {
           status: 'completed',
         },
       })
+
+      // Send email notification with progress
+      if (customer.email && (business as any).smtpEnabled && (business as any).smtpUser) {
+        const finalPoints = customer.totalPoints + pointsEarned
+        const finalVisits = customer.totalVisits + 1
+        try {
+          await sendCheckinProgressEmail(
+            business,
+            { name: customer.name, totalPoints: finalPoints, totalVisits: finalVisits },
+            pointsEarned,
+            { smtpHost: (business as any).smtpHost, smtpPort: (business as any).smtpPort, smtpUser: (business as any).smtpUser, smtpPassword: (business as any).smtpPassword, smtpFrom: (business as any).smtpFrom }
+          )
+        } catch (e) { console.error('Check-in email error:', e) }
+      }
 
       // Send Telegram notification after check-in
       const sendNotification = async () => {

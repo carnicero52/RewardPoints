@@ -1,5 +1,6 @@
 import { db } from '@/lib/db'
 import { getAuthPayload } from '@/lib/auth'
+import { sendWelcomeEmail } from '@/lib/email-notify'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(request: NextRequest) {
@@ -51,6 +52,22 @@ export async function POST(request: NextRequest) {
         active: true,
       },
     })
+
+    // Send welcome email if email provided and SMTP configured
+    if (email?.trim()) {
+      const business = await db.business.findUnique({ where: { id: businessId } })
+      if (business?.smtpEnabled && business?.smtpUser && business?.smtpPassword) {
+        try {
+          await sendWelcomeEmail(business, customer, {
+            smtpHost: business.smtpHost,
+            smtpPort: business.smtpPort,
+            smtpUser: business.smtpUser,
+            smtpPassword: business.smtpPassword,
+            smtpFrom: business.smtpFrom,
+          })
+        } catch (e) { console.error('Welcome email error:', e) }
+      }
+    }
 
     return NextResponse.json(customer)
   } catch (error: any) {
