@@ -58,8 +58,6 @@ export async function PUT(request: NextRequest) {
         // Telegram
         telegramEnabled: body.telegramEnabled,
         telegramBotToken: body.telegramBotToken,
-        callmebotApiKey: body.callmebotApiKey,
-        callmebotPhone: body.callmebotPhone,
         telegramChatId: body.telegramChatId,
       },
     })
