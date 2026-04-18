@@ -139,6 +139,12 @@ export function PublicCheckInView() {
         setCurrentPoints(data.customer.totalPoints ?? 0)
         setTotalVisits(data.customer.totalVisits ?? 0)
       }
+      // Set business info
+      if (data.business) {
+        setBusinessName(data.business?.name || '')
+        setBusinessLogo(data.business?.logo || '')
+        setBrandColor(data.business?.brandColor || '#6366f1')
+      }
       setProgress(data.progress || null)
       setStep('success')
     } catch (error: any) {
