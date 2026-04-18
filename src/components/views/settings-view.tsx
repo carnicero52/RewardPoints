@@ -543,3 +543,71 @@ export function SettingsView() {
     </div>
   )
 }
+        {/* Test Notification Buttons */}
+        <Card className="border-blue-500">
+          <CardHeader>
+            <CardTitle>Probar Notificaciones</CardTitle>
+            <CardDescription>Envía mensajes de prueba</CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-wrap gap-2">
+            <Button variant="outline" onClick={async () => {
+              try {
+                const res = await fetch('/api/notifications/test', {
+                  method: 'POST',
+                  headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ channel: 'telegram' })
+                })
+                const data = await res.json()
+                if (res.ok && data.success) toast.success('✅ Telegram enviado')
+                else toast.error(data.error || 'Error')
+              } catch (e) { toast.error('Error de conexión') }
+            }}>Probar Telegram</Button>
+            
+            <Button variant="outline" onClick={async () => {
+              try {
+                const res = await fetch('/api/notifications/test', {
+                  method: 'POST',
+                  headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ channel: 'email' })
+                })
+                const data = await res.json()
+                if (res.ok && data.success) toast.success('✅ Email enviado')
+                else toast.error(data.error || 'Error')
+              } catch (e) { toast.error('Error de conexión') }
+            }}>Probar Email</Button>
+
+            <Button variant="outline" onClick={async () => {
+              try {
+                const res = await fetch('/api/notifications/test', {
+                  method: 'POST',
+                  headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ channel: 'test' })
+                })
+                const data = await res.json()
+                if (res.ok && data.success) toast.success('✅ Prueba enviada')
+                else toast.error(data.error || 'Error')
+              } catch (e) { toast.error('Error de conexión') }
+            }}>Probar Todo</Button>
+          </CardContent>
+        </Card>
+
+        {/* Danger Zone */}
+        <Card className="border-red-500">
+          <CardHeader>
+            <CardTitle className="text-red-400">Zona de Peligro</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Button variant="destructive" onClick={async () => {
+              if (!confirm('¿Borrar TODO el historial? Esta acción no se puede deshacer.')) return
+              try {
+                const res = await fetch('/api/transactions/clear', {
+                  method: 'DELETE',
+                  headers: authHeaders()
+                })
+                const data = await res.json()
+                if (res.ok && data.success) toast.success('✅ Historial borrado')
+                else toast.error(data.error || 'Error')
+              } catch (e) { toast.error('Error de conexión') }
+            }}>Borrar Historial de Transacciones</Button>
+          </CardContent>
+        </Card>
