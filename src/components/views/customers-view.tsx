@@ -31,6 +31,7 @@ export function CustomersView() {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [showAddModal, setShowAddModal] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   
   const [newCustomer, setNewCustomer] = useState({
