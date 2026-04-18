@@ -394,6 +394,7 @@ export function PublicCheckInView() {
           </Card>
         )}
 
+        {/* DEBUG: Show success if any data exists */}
         {step === 'success' && (
           <div className="space-y-4">
             {/* Welcome Card */}
