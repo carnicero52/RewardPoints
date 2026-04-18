@@ -1,30 +1,22 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { getAuthPayload } from '@/lib/auth'
 import { db } from '@/lib/db'
 import { sendTelegramMessage } from '@/lib/telegram-notify'
 import { sendEmailNotification } from '@/lib/email-notify'
+import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(request: NextRequest) {
   try {
+    const { businessId } = getAuthPayload(request)
     const body = await request.json()
     const { channel, phone } = body
 
-    const authHeader = request.headers.get('authorization')
-    if (!authHeader) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const token = authHeader.replace('Bearer ', '')
-    
-    const admin = await db.admin.findFirst({
-      where: { token },
-      include: { business: true }
+    const business = await db.business.findUnique({
+      where: { id: businessId }
     })
 
-    if (!admin || !admin.business) {
-      return NextResponse.json({ error: 'Token inválido' }, { status: 401 })
+    if (!business) {
+      return NextResponse.json({ error: 'Negocio no encontrado' }, { status: 404 })
     }
-
-    const business = admin.business
 
     // Telegram Bot (direct)
     if (channel === 'telegram') {
@@ -45,13 +37,13 @@ export async function POST(request: NextRequest) {
 
     // Callmebot (Telegram)
     if (channel === 'callmebot') {
-      if (!process.env.CALLMEBOT_API_KEY) {
-        return NextResponse.json({ success: false, error: 'CALLMEBOT_API_KEY no configurada' })
+      if (!business.callmebotApiKey) {
+        return NextResponse.json({ success: false, error: 'Callmebot API key no configurada' })
       }
 
       const testPhone = phone || business.phone
       if (!testPhone) {
-        return NextResponse.json({ success: false, error: 'Necesitas un número de teléfono' })
+        return NextResponse.json({ success: false, error: 'Número de teléfono no disponible' })
       }
 
       const testMessage = `🔔 *Prueba RewardPoints*\n\n${business.name}: Notificaciones de Callmebot funcionando! ✅`
@@ -59,7 +51,7 @@ export async function POST(request: NextRequest) {
       const result = await sendTelegramMessage({
         user: testPhone,
         text: testMessage,
-        apiKey: process.env.CALLMEBOT_API_KEY
+        apiKey: business.callmebotApiKey
       })
 
       return NextResponse.json({ success: result.success, messageId: result.messageId, error: result.error })
@@ -67,13 +59,13 @@ export async function POST(request: NextRequest) {
 
     // Callmebot WhatsApp
     if (channel === 'whatsapp') {
-      if (!process.env.CALLMEBOT_API_KEY) {
-        return NextResponse.json({ success: false, error: 'CALLMEBOT_API_KEY no configurada' })
+      if (!business.callmebotApiKey) {
+        return NextResponse.json({ success: false, error: 'Callmebot API key no configurada' })
       }
 
       const testPhone = phone || business.phone
       if (!testPhone) {
-        return NextResponse.json({ success: false, error: 'Necesitas un número de teléfono' })
+        return NextResponse.json({ success: false, error: 'Número de teléfono no disponible' })
       }
 
       const testMessage = `🔔 *Prueba RewardPoints*\n\n${business.name}: Notificaciones de WhatsApp funcionando! ✅`
@@ -81,7 +73,7 @@ export async function POST(request: NextRequest) {
       const result = await sendTelegramMessage({
         user: testPhone,
         text: testMessage,
-        apiKey: process.env.CALLMEBOT_API_KEY,
+        apiKey: business.callmebotApiKey,
         isWhatsApp: true
       })
 
