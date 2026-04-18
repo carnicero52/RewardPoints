@@ -34,7 +34,7 @@ export function CustomersView() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   
-  const [newCustomer, setNewCustomer] = useState({
+  const [newCustomer, setNewCustomer] = useState({ id: '',
     name: '',
     email: '',
     phone: '',
@@ -69,14 +69,14 @@ export function CustomersView() {
       const res = await fetch(url, {
         method,
         headers: { ...authHeaders(), 'Content-Type': 'application/json' },
-        body: JSON.stringify(newCustomer),
+        body: JSON.stringify(isEdit ? newCustomer : { name: newCustomer.name, email: newCustomer.email, phone: newCustomer.phone, telegram: newCustomer.telegram }),
       })
 
       if (!res.ok) throw new Error('Error saving customer')
 
       toast.success(isEdit ? 'Cliente actualizado' : 'Cliente creado exitosamente')
       setShowAddModal(false)
-      setNewCustomer({ name: '', email: '', phone: '', telegram: '', callmebot: '' })
+      setNewCustomer({ id: '', name: '', email: '', phone: '', telegram: '', callmebot: '' })
       loadCustomers()
     } catch (error: any) {
       toast.error(error.message)
