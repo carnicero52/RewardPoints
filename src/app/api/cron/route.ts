@@ -1,14 +1,10 @@
 import { db } from '@/lib/db'
 import { sendTelegramMessage } from '@/lib/telegram-notify'
-import { sendEmailNotification } from '@/lib/email-notify'
 import { NextRequest, NextResponse } from 'next/server'
 
 /**
  * Cron API for scheduled notifications
- * 
- * Types:
- * - test | inactive | daily_summary | hourly_check
- * - collections | marketing | reward_reminder | birthday
+ * No secret required if CRON_SECRET is not set in env
  */
 
 export async function GET(request: NextRequest) {
@@ -18,8 +14,9 @@ export async function GET(request: NextRequest) {
     const secret = searchParams.get('secret')
     
     const CRON_SECRET = process.env.CRON_SECRET
-    if (CRON_SECRET && secret !== CRON_SECRET) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // Allow bypass if no CRON_SECRET is configured
+    if (CRON_SECRET && CRON_SECRET.length > 0 && secret !== CRON_SECRET) {
+      return NextResponse.json({ error: 'Unauthorized - invalid secret or missing CRON_SECRET env' }, { status: 401 })
     }
 
     const businesses = await db.business.findMany({
@@ -27,8 +24,6 @@ export async function GET(request: NextRequest) {
         OR: [
           { telegramEnabled: true },
           { telegramChatId: { not: null } },
-          { callmebotApiKey: { not: null } },
-          { smtpEnabled: true },
         ]
       }
     })
@@ -37,7 +32,6 @@ export async function GET(request: NextRequest) {
 
     for (const business of businesses) {
       try {
-        // TEST
         if (type === 'test') {
           const msg = `🔔 *Prueba RewardPoints*\n\n${business.name}: ¡Cron funcionando! ✅\nHora: ${new Date().toLocaleString()}`
           if (business.telegramEnabled && business.telegramChatId) {
@@ -46,7 +40,6 @@ export async function GET(request: NextRequest) {
           results.push({ business: business.name, status: 'test sent' })
         }
         
-        // INACTIVE CUSTOMERS
         if (type === 'inactive') {
           const days = parseInt(searchParams.get('days') || '30')
           const cutoffDate = new Date()
@@ -57,41 +50,35 @@ export async function GET(request: NextRequest) {
           })
           
           if (inactiveCustomers.length > 0 && business.telegramEnabled && business.telegramChatId) {
-            const msg = `😢 *Clientes Inactivos*\n\n${business.name}: ${inactiveCustomers.length} cliente(s) inactivo(s) hace ${days} días.\n\n${inactiveCustomers.slice(0, 5).map(c => `• ${c.name}`).join('\n')}`
+            const msg = `😢 *Clientes Inactivos*\n\n${business.name}: ${inactiveCustomers.length} cliente(s) inactivo(s) hace ${days} días.`
             await sendTelegramMessage({ user: business.telegramChatId, text: msg, apiKey: business.telegramBotToken || undefined })
           }
           results.push({ business: business.name, inactive: inactiveCustomers.length })
         }
         
-        // COLLECTIONS (Clientes con saldo pendiente)
         if (type === 'collections') {
           const customersWithDebt = await db.customer.findMany({
-            where: { 
-              businessId: business.id,
-              totalPoints: { gte: 100 } // Canjeo pendiente mayor a 100 puntos
-            },
-            select: { name: true, phone: true, totalPoints: true }
+            where: { businessId: business.id, totalPoints: { gte: 100 } },
+            select: { name: true, totalPoints: true }
           })
           
           if (customersWithDebt.length > 0 && business.telegramEnabled && business.telegramChatId) {
-            const msg = `💰 *Cobranzas Pendientes*\n\n${business.name}: ${customersWithDebt.length} cliente(s) con saldo.\n\n${customersWithDebt.slice(0, 5).map(c => `• ${c.name}: ${c.totalPoints} pts`).join('\n')}`
+            const msg = `💰 *Cobranzas*\n\n${business.name}: ${customersWithDebt.length} cliente(s) con saldo pendiente.`
             await sendTelegramMessage({ user: business.telegramChatId, text: msg, apiKey: business.telegramBotToken || undefined })
           }
           results.push({ business: business.name, pending: customersWithDebt.length })
         }
         
-        // MARKETING (Todos los clientes)
         if (type === 'marketing') {
-          const message = searchParams.get('message') || '¡Visita我们的 negocio y gana puntos!'
+          const message = searchParams.get('message') || '¡Visita nuestro negocio!'
           const allCustomers = await db.customer.findMany({
             where: { businessId: business.id },
             select: { name: true, phone: true }
           })
           
           let sent = 0
-          // Send via Callmebot if configured
           if (business.callmebotApiKey && allCustomers.length > 0) {
-            for (const customer of allCustomers.slice(0, 50)) { // Max 50 per run
+            for (const customer of allCustomers.slice(0, 50)) {
               if (customer.phone) {
                 await sendTelegramMessage({
                   user: customer.phone,
@@ -106,7 +93,6 @@ export async function GET(request: NextRequest) {
           results.push({ business: business.name, marketing_sent: sent })
         }
         
-        // DAILY SUMMARY
         if (type === 'daily_summary') {
           const today = new Date()
           today.setHours(0, 0, 0, 0)
@@ -118,7 +104,7 @@ export async function GET(request: NextRequest) {
           })
           
           if (business.telegramEnabled && business.telegramChatId) {
-            const msg = `📊 *Resumen Diario*\n\n${business.name}\n\n✅ Visitas hoy: ${todayTransactions}`
+            const msg = `📊 *Resumen*\n\n${business.name}\n\nVisitas hoy: ${todayTransactions}`
             await sendTelegramMessage({ user: business.telegramChatId, text: msg, apiKey: business.telegramBotToken || undefined })
           }
           results.push({ business: business.name, transactions: todayTransactions })
